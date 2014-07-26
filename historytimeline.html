@@ -28,7 +28,7 @@ body {
   <div id="eraSVG"></div>
   <div id="fullTContainer"></div>
   
-  <script src="js/d3v3.1.10.min.js"></script>
+  <script src="js/d3.v3.4.11.min.js"></script>
   <script>
 d3.tl = {};
 var testErasArr = [
@@ -98,9 +98,8 @@ d3.tl.Timeline = function (kind) {
 };
 d3.tl.Timeline.prototype.addHeaderDiv = function (container) {
   this.containerID = container;
-  // grab TimelineObj because "this" is set to current selection el below;
+  // grab TimelineObj because "this" is set to current selection el in .each loop below;
   var t = this;
-  console.log(t);
   d3.select("#" + container)
       .style(t.containerStyles)
     .append("div")
@@ -131,7 +130,6 @@ d3.tl.Timeline.prototype.addTimelineDiv = function (container) {
   };
   // grab TimelineObj because "this" is set to current selection el below;
   var t = this;
-  console.log(t);
   d3.select("#" + container)
       .style(t.containerStyles)
     .append("div")
@@ -185,13 +183,14 @@ d3.tl.Timeline.prototype.drawTimeAxis = function (startYr, stopYr) {
   // set up timescale for x-axis; 
   var minDate = d3.min(this.erasArr, function(d){ return d.start });
   var maxDate = d3.max(this.erasArr, function(d){ return d.stop });
-  console.log("min/max: " + minDate, maxDate);
-  /*
-  if (startYr !== null) {
+  if (startYr !== null && stopYr !== null && startYr < stopYr) {
     minDate = startYr;
     maxDate = stopYr;
+  } else {
+    console.log("startYr, stopYr problem");
   }
-  */
+  console.log("min/max: " + minDate + "/" + maxDate);
+
   this.timeScale = d3.scale.linear()
                           .domain([minDate, maxDate])
                           .rangeRound([this.svgSideMargin,
@@ -218,7 +217,7 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
       .selectAll("rect")
       .data(this.erasArr)
       .enter()
-      // one rect for each object in the array;
+      // one rect for each object in the array; "this" is the rect;
     .append("rect")
       // the id is the label, e.g., "UnitedKingdom" (alphanum only);
       .attr("id", function(d){ return d.label.replace(/\W/g, "") })
