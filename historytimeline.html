@@ -9,9 +9,6 @@ body {
   background-color: yellow;
   font-family: Palatino, serif;
 }
-#eraUI {
-  width: 500px;
-}
 #fullTContainer {
   padding: 20px 10px;
   border: 2px solid green;
@@ -20,13 +17,12 @@ body {
 </head>
 <body>
   <h1>History Timeline UI Example</h1>
-  <div id="eraUI"></div>
-  <div id="eraSVG"></div>
   <div id="fullTContainer"></div>
   
   <script src="js/d3.v3.4.11.min.js"></script>
   <script>
 d3.tl = {};
+// added to new Timeline obj for testing;
 var testErasArr = [
     {label: "Judges", start: -1100, stop: -1020,
        topY: 0, height: 1.0, bgcolor: "#A9BCF5"},
@@ -60,7 +56,7 @@ var testPrecipEventsObj = {
     "70": "<p>In <b>70 CE</b>, the Romans ended the First Jewish War (66-70) by sacking Jerusalem and destroying the Temple.</p>"
   }
 
-/* =============  Era object ====================== */
+/* =============  Era constructor ====================== */
 d3.tl.Era = function (label, start, stop, bgcolor) {
   this.label = label || "Example Label";
   this.start = start || -380;
@@ -71,8 +67,7 @@ d3.tl.Era = function (label, start, stop, bgcolor) {
   this.voffset = 0;
 };
 
-
-/* =============  Timeline object ====================== */
+/* =============  Timeline constructor ====================== */
 d3.tl.Timeline = function (kind) {
   this.title = "Placeholder Title:";
   this.subtitle = "Subtitle Placeholder";
@@ -94,14 +89,13 @@ d3.tl.Timeline = function (kind) {
 
   this.containerStyles = {
     "width": (this.svgWidth + 4) + "px",
-    // "height": (this.svgHeight + 4) + "px",
     "position": "relative",
     "font-family": "Palatino, Times, \"Times New Roman\", Georgia, serif",
     "background-color": "white"
   };
   
   this.footerHTML = "<span id=\"drawnBy\">Drawn by historytimeline.js. " +
-                    "(<a href=\"http://github/bruml2/historytimeline\">Info " +
+                    "(<a href=\"https://github.com/bruml2/historytimeline\">Info " +
                     "and code</a>)</span>";
   this.footerStyles = {"padding": "10px 15px",
                        "margin-top": "20px",
@@ -118,9 +112,10 @@ d3.tl.Timeline = function (kind) {
   this.D3svg = null;
   this.D3erasGrp = null;
 };
+
 d3.tl.Timeline.prototype.addHeaderDiv = function (container) {
   this.containerID = container;
-  // grab TimelineObj because "this" is set to current selection el in .each loop below;
+  // "this" is set to current selection el in .each loop below;
   var t = this;
   d3.select("#" + container)
       .style(t.containerStyles)
@@ -253,7 +248,7 @@ d3.tl.Timeline.prototype.drawTimeAxis = function (startYr, stopYr) {
 
 /* ======================================================================= */
 d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
-  // if targetEraLabel is specified, others are 70% opacity;
+  // if targetEraLabel is specified, others are 50% opacity;
   // grab TimelineObj because "this" is set to current selection el below;
   var t = this;
   // D3erasGrp is a selection array of all the rects;
@@ -280,7 +275,7 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
       .style("stroke", "black")
       // show the two dates and the precipEventsPanel;
       .on("mouseover", function(){
-        console.log("mouseover: " + this.__data__.label);
+        // console.log("mouseover: " + this.__data__.label);
         if (t.hasEraDatesOnHover && !t.showingAll) {
           // on mouseover of era, select the two start/stop dates whose class
           // is the era's id (the dates are text els) and make them visible;
@@ -288,7 +283,6 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
           d3.selectAll(classSelectorStr).classed("hidden", false);
         };
         if (t.hasPrecipEventsOnHover && !t.showingAll) {
-          console.log("eventsPanel");
           // get position and text for the precipEventsPanel; make opaque;
           var eraObj = this.__data__;
           var leftX = t.timeScale(eraObj.start) - 10;
@@ -313,7 +307,7 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
       }) // end of mouseover;
       // hide the two dates and the precipEventsPanel;
       .on("mouseout", function(){
-        console.log("mouseout:  " + this.__data__.label);
+        // console.log("mouseout:  " + this.__data__.label);
         if (!t.showingDates && !t.showingAll) {
           var classSelector = ".eraDateGrp ." + d3.select(this).attr("id");
           d3.selectAll(classSelector).classed("hidden", true);
@@ -441,13 +435,13 @@ d3.tl.Timeline.prototype.drawEraDates = function () {
         .text(function(d){ return start ? d.start : d.stop })
         .attr("font-family", "sans-serif")
         .attr("font-size", t.eraDateFontSize)
-        // .attr("font-weight", "bold")
         .attr("fill", "black")
         .attr("text-rendering", "optimizeLegibility");
   }
   addEraDates("start");
   addEraDates("stop");
   
+  // This is gives the wrong value (1); why?
   console.log("Num of dates: " + d3.selectAll(".eraDate").length);   
 };
 
@@ -460,13 +454,13 @@ d3.tl.Timeline.prototype.setup = function (container) {
 };
 
 /* ======================================================================= */
-d3.tl.Timeline.prototype.draw = function () {
+d3.tl.Timeline.prototype.draw = function (targetEra) {
   // draws the entire timeline assuming <container>-timeline div;
 };
 
 /* ========== END OF CODE ================================================ */
 d3.tl.fullt = new d3.tl.Timeline();
-// add testErasArr to timeline;
+// add test data to timeline;
 d3.tl.fullt.erasArr = testErasArr;
 d3.tl.fullt.precipEventsObj = testPrecipEventsObj;
 d3.tl.fullt.hasPrecipEventsOnHover = true;
