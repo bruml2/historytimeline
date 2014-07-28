@@ -26,8 +26,12 @@ d3.tl.Timeline = function (kind) {
   this.svgSideMargin = 25;
   this.borderColor = "#A41034"; // Harvard Crimson;
   this.backgroundColor = "bisque";
+  // runtime values:
   this.timeScale = null;
   this.containerID = null;
+  this.dataOrigin = null;
+  this.footerTextBuffer = null;
+  
   this.erasArr = [ new d3.tl.Era() ];
   this.eraLabelsFontSize = "16px";
   this.eraLabelsFontFamily = "Palatino, Times, \"Times New Roman\", Georgia, serif";
@@ -41,7 +45,7 @@ d3.tl.Timeline = function (kind) {
     "background-color": "white"
   };
   
-  this.footerHTML = "<span id=\"drawnBy\">Drawn by historytimeline.js. " +
+  this.footerHTML = "<span class=\"drawnBy\">Drawn by historytimeline.js. " +
                     "(<a href=\"https://github.com/bruml2/historytimeline\">Info " +
                     "and code</a>)</span>";
   this.footerStyles = function () {
@@ -53,7 +57,7 @@ d3.tl.Timeline = function (kind) {
   // can be turned off;
   this.hasEraDatesOnHover = true;
   this.hasPrecipEventsOnHover = false;
-  this.hasDiscussionTextOnHover = false;
+  this.hasFooterTextOnHover = false;
   
   this.showingDates = false;
   this.showingAll   = false;
@@ -74,10 +78,12 @@ d3.tl.Timeline.prototype.loadTimeline = function (tlObj) {
   }
   // check for features;
   if (this.precipEventsObj) {
+    console.log("Found precipEventsObj");
     this.hasPrecipEventsOnHover = true;
   }
-  if (this.discussionTextsObj) {
-    this.hasDiscussionTextOnHover = true;
+  if (this.footerTextObj) {
+    console.log("Found footerTextObj");
+    this.hasFooterTextOnHover = true;
   }
 };
 
@@ -270,9 +276,12 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
               .duration(400)
               .style("opacity", 0.95);
         }
-        if (t.hasFooterText) {
-          d3.select("#tlFooter")
+        if (t.hasFooterTextOnHover) {
+          var D3footer = d3.select("#" + t.containerID + "-footer");
+          t.footerTextBuffer = D3footer.html();
+          D3footer
               .html(t.footerTextObj[this.__data__.label])
+              // may not be hidden;
               .classed("hidden", false);
         }
       }) // end of mouseover;
@@ -289,9 +298,11 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
               .duration(400)
               .style("opacity", 1e-6);
         }
-        if (t.hasFooterText) {
-          d3.select("#tlFooter")
-              .classed("hidden", true);
+        if (t.hasFooterTextOnHover) {
+          // restore normal footer contents;
+          d3.select("#" + t.containerID + "-footer")
+              .html(t.footerTextBuffer);
+              // .classed("hidden", true);
         }
       });  // end of mouseout;
   if (targetEraLabel) {
