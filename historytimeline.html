@@ -18,28 +18,34 @@ body {
 </head>
 <body>
   <h1>History Timeline Examples</h1>
-  <div id="overviewContainer" class="tlContainer"></div>
-  <div id="ideasBasicContainer" class="tlContainer"></div>
+  <div id="overviewAContainer" class="tlContainer"></div>
+  <div id="overviewBContainer" class="tlContainer"></div>
   
   <script src="js/d3.v3.4.11.min.js"></script>
   <script src="js/historytimeline.js"></script>
   <script src="tl/overviewTL.js"></script>
   <script>
-    d3.tl.overview = new d3.tl.Timeline();
-    d3.tl.overview.loadTimeline(d3.tl.overviewTL);
-    d3.tl.overview.setup("overviewContainer");
-    d3.tl.overview.draw("Persian Period");
+    d3.tl.overviewA = new d3.tl.Timeline();
+    d3.tl.overviewA.loadTimeline(d3.tl.overviewTL);
+    d3.tl.overviewA.setup("overviewAContainer");
+    d3.tl.overviewA.draw("Persian Period");
     
-    d3.tl.overview = new d3.tl.Timeline();
-    d3.tl.overview.loadTimeline(d3.tl.overviewTL);
-    d3.tl.customStyle = {
-      "borderColor": "#A41034"
+    d3.tl.overviewB = new d3.tl.Timeline();
+    d3.tl.overviewB.loadTimeline(d3.tl.overviewTL);
+    d3.tl.harvardStyle = {
+      "borderColor": "#A41034",
+      "footerHTML": "<span id=\"drawnBy\">Drawn by historytimeline.js. " +
+                    "(<a href=\"https://github.com/bruml2/historytimeline\">Info " +
+                    "and code</a>). In consultation with Lars Kotthoff.</span>"
     };
-    d3.tl.overview.loadTimeline(d3.tl.customStyle);
-    d3.tl.overview.setup("ideasBasicContainer");
-    d3.tl.overview.draw();
+    d3.tl.princetonStyle = {
+      "borderColor": "#FF5800"
+    };
+    d3.tl.overviewB.loadTimeline(d3.tl.harvardStyle);
+    d3.tl.overviewB.setup("overviewBContainer");
+    d3.tl.overviewB.draw();
     
-    console.log(d3.tl.overview);
+    console.log(d3.tl.overviewB);
   </script>
 </body>
 </html>
