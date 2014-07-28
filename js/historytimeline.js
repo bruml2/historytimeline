@@ -58,6 +58,9 @@ d3.tl.Timeline = function (kind) {
   this.hasEraDatesOnHover = true;
   this.hasPrecipEventsOnHover = false;
   this.hasFooterTextOnHover = false;
+  this.hasEvents = false;
+  this.hasPeople = false;
+  this.hasEmblems = false;
   
   this.showingDates = false;
   this.showingAll   = false;
@@ -84,6 +87,10 @@ d3.tl.Timeline.prototype.loadTimeline = function (tlObj) {
   if (this.footerTextObj) {
     console.log("Found footerTextObj");
     this.hasFooterTextOnHover = true;
+  }
+  if (this.eventsArr) {
+    console.log("Found eventsArr");
+    this.hasEvents = true;
   }
 };
 
@@ -429,6 +436,48 @@ d3.tl.Timeline.prototype.drawEraDates = function () {
 };
 
 /* ======================================================================= */
+d3.tl.Timeline.prototype.drawEvents = function () {
+  var t = this;
+  t.D3events = t.D3svg.append("g")
+      .attr("class", "eventsGrp")
+      .selectAll("circle")
+      .data(t.eventsArr)
+      .enter()
+    .append("circle")
+      .style("fill", "#666")
+      .attr("id", function(d){ return d.label.replace(/\W/g, "") + "Label" })
+      .attr("cx", function(d){ return t.timeScale(d.date) })
+      .attr("cy", function(d){ 
+                        return (d.centerY * t.eraHeight) + t.eraTopMargin })
+      .attr("r",  6)
+      .on("mouseover", function(){
+        // display the infoPanel under the circle;
+        // get position and text for the infoPanel;
+        console.log("Event mouseover");
+        var d = this.__data__;
+        var leftX = t.timeScale(d.date) - 30;
+        var topY  = t.eraTopMargin + (d.centerY * t.eraHeight) + 16;
+        var panelText = d.label;
+        console.log(t.D3precipEventsPanel);
+        t.D3precipEventsPanel.style("max-width", "200px")
+                 .style("position", "absolute")
+                 .style("left", function(d) { return leftX + "px" })
+                 .style("top", topY + "px")
+                 .style("opacity", 1e-6)
+                 .html(panelText)
+                .transition()
+                 .duration(500)
+                 .style("opacity", 0.95);
+      })
+      .on("mouseout", function(){
+        t.D3precipEventsPanel
+                 .transition()
+                 .duration(500)
+                 .style("opacity", 1e-6);
+      });
+};
+
+/* ======================================================================= */
 d3.tl.Timeline.prototype.setup = function (container) {
   // adds to DOM inside container;
   this.addHeaderDiv(container);
@@ -443,6 +492,7 @@ d3.tl.Timeline.prototype.draw = function (targetEra) {
   this.drawEras(targetEra);
   this.drawEraLabels(targetEra);
   this.drawEraDates();
+  if (this.hasEvents) { this.drawEvents(); };
 };
 
 /* ========== END OF CODE ================================================ */
