@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<!-- this is htlBuilder.html begun July 29, 2014 -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>History Timeline Builder</title>
+  <style>
+body {
+  background-color: yellow;
+  font-family: Palatino, serif;
+}
+.tlContainer {
+  padding: 20px 10px;
+  border: 2px solid green;
+  margin-bottom: 20px;
+}
+/* ==================== */
+#startPanel {
+  position: relative;
+  width: 620px;
+  margin: 0 auto;
+  margin-bottom: 20px;
+  padding: 5px;
+  background-color: wheat;
+}
+#startPanelForm label {
+  width: 80px;
+  float: left;
+  position: relative;
+  top: 7px;
+  text-align: right;
+  color: red;
+}
+#startPanel input[type=text] {
+  font-size: 16px;
+  border-radius: 5px;
+  /* border: 5px solid white; */
+  box-shadow: 
+    inset 0 0 8px  rgba(0,0,0,0.1),
+          0 0 16px rgba(0,0,0,0.1); 
+  padding: 6px;
+  background: rgba(255,255,255,0.5);
+  margin: 0 0 10px 0;
+
+  background-color: #D7EFFF; 
+  border: 1px solid #646464; 
+  outline: none; 
+}
+#startPanel input[type=text]:focus {
+  border: 2px solid red; 
+}
+#startPanel button {
+  position: absolute;
+  bottom: 24px;
+  right: 20px;
+  font-family: arial, sans-serif;
+  font-size: 14px;
+  padding: 4px;
+  border-radius: 4px;
+}
+#startPanel button:hover {
+  border: 2px solid red;
+  cursor: pointer;
+}
+  </style>
+</head>
+<body>
+  <h1>History Timeline Builder UI</h1>
+  <div id="htlBuilderContainer" class="tlContainer">
+    <div id="startPanel">
+      <h3>Step 1:</h3>
+      <p>Please enter the <b>title</b> and <b>subtitle</b> of your timeline (can be changed at any time) and the <b>beginning and ending years</b> for the <b>time axis</b> (BCE years are negative).</p>
+      
+      <form class="startPanelForm" action="#" method="post">
+        <div>
+          <label for="title">Title: &nbsp;</label>
+          <input type="text" id="title" name="title" value="" tabindex="1" 
+                 size="50" placeholder="Enter the title here"/>
+        </div>      
+        <div>
+          <label for="subtitle">Subtitle: &nbsp;</label>
+          <input type="text" id="subtitle" name="subtitle" value="" tabindex="2" 
+                 size="50" placeholder="Enter the subtitle here"/>
+        </div>      
+        <div>
+          <label for="startYr" style="width: 200px">Begin Year: &nbsp;</label>
+          <input type="text" id="startYr" name="startYr" value="" tabindex="3" 
+                 size="6" placeholder="-1500"/>
+          <label for="stopYr" style="top: 0; margin-left: 20px; float: none">End Year: &nbsp;</label>
+          <input type="text" id="stopYr" name="stopYr" value="" tabindex="4" 
+                 size="6" placeholder="2014"/>
+        </div>
+        <button class="doneBtn"/>Done</button>            
+      </form>    ​
+    </div>
+    <div id="eraPanel" style="display: none;">
+      <h3>Step 2: Add Eras</h3>
+      <p>This is the place where one or more eras will be added to the timeline.  An era is a rectangle usually occupying the full height of the timeline and representing some background condition such as the name of the period (e.g., Persian Period) or the reign of a monarch (e.g., Louis XIV).</p>
+    </div
+  </div>
+  <div id="currentTLContainer" class="tlContainer"></div>
+  <script src="js/d3.v3.4.11.min.js"></script>
+  <script src="js/jquery-2.1.1.min.js"></script> 
+  <script src="../js/historytimeline.js"></script>
+  <script>
+    $( document ).ready(function() {
+$("#startPanel .doneBtn").on("click", function (event) {
+  $("#startPanel").slideUp(600, function () {
+    $("#eraPanel").slideDown(600);
+  });
+});
+    }); // END OF document.#ready
+  </script>
+</body>
+</html>

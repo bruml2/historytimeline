@@ -1,10 +1,10 @@
 Notes for Lars
 ====================
 
-On line 391, the wrong number (1) of “eraDate” elements is returned.  Why?
-
 Any way to get an offline version of the d3 API docs?
 
 Something like this for d3?
   http://james.padolsey.com/jquery/#v=1.6.2&fn=jQuery.extend
 
+Stunning text input simulation (jQuery plugin):
+  http://dropthebit.com/demos/fancy_input/fancyInput.html

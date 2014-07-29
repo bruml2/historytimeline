@@ -54,7 +54,8 @@ d3.tl.Timeline = function (kind) {
                        "border": "2px solid " + this.borderColor,
                        "font-size": "12px"}
   };
-  // can be turned off;
+  // can be turned off or on;
+  this.hasFooter = true;
   this.hasEraDatesOnHover = true;
   this.hasPrecipEventsOnHover = false;
   this.hasFooterTextOnHover = false;
@@ -431,8 +432,8 @@ d3.tl.Timeline.prototype.drawEraDates = function () {
   addEraDates("start");
   addEraDates("stop");
   
-  // This is gives the wrong value (1); why?
-  console.log("Num of dates: " + d3.selectAll(".eraDate").length);   
+  console.log("Num eraDate elements: " +
+   d3.selectAll("#" + t.containerID + "-timeline .eraDate")[0].length);   
 };
 
 /* ======================================================================= */
@@ -482,7 +483,7 @@ d3.tl.Timeline.prototype.setup = function (container) {
   // adds to DOM inside container;
   this.addHeaderDiv(container);
   this.addTimelineDiv(container);
-  if (true) { this.addFooterDiv(container); };
+  if (this.hasFooter) { this.addFooterDiv(container); };
 };
 
 /* ======================================================================= */
