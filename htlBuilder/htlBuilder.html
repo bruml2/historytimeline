@@ -15,7 +15,7 @@ body {
   margin-bottom: 20px;
 }
 /* ==================== */
-#startPanel {
+.panel {
   position: relative;
   width: 620px;
   margin: 0 auto;
@@ -23,15 +23,26 @@ body {
   padding: 5px;
   background-color: wheat;
 }
-#startPanelForm label {
-  width: 80px;
-  float: left;
+.textboxDiv {
+  margin-top: 10px;
+}
+form label {
   position: relative;
   top: 7px;
   text-align: right;
   color: red;
 }
-#startPanel input[type=text] {
+#startPanelForm label {
+  float: left;
+}
+#eraPanel1 {
+  display: none;
+  overflow: hidden;
+}
+#eraPanel1 label {
+  top: 0;
+}
+form input {
   font-size: 16px;
   border-radius: 5px;
   /* border: 5px solid white; */
@@ -46,10 +57,10 @@ body {
   border: 1px solid #646464; 
   outline: none; 
 }
-#startPanel input[type=text]:focus {
+form input:focus {
   border: 2px solid red; 
 }
-#startPanel button {
+form button {
   position: absolute;
   bottom: 24px;
   right: 20px;
@@ -58,57 +69,138 @@ body {
   padding: 4px;
   border-radius: 4px;
 }
-#startPanel button:hover {
+form button:hover {
   border: 2px solid red;
   cursor: pointer;
+}
+img {
+  border: 1px solid black;
 }
   </style>
 </head>
 <body>
   <h1>History Timeline Builder UI</h1>
   <div id="htlBuilderContainer" class="tlContainer">
-    <div id="startPanel">
-      <h3>Step 1:</h3>
-      <p>Please enter the <b>title</b> and <b>subtitle</b> of your timeline (can be changed at any time) and the <b>beginning and ending years</b> for the <b>time axis</b> (BCE years are negative).</p>
-      
-      <form class="startPanelForm" action="#" method="post">
-        <div>
-          <label for="title">Title: &nbsp;</label>
-          <input type="text" id="title" name="title" value="" tabindex="1" 
-                 size="50" placeholder="Enter the title here"/>
+    
+    <!-- ================================================================ -->
+    <div id="startPanel" class="panel">
+      <h3>Step 1: The Bare Minimum</h3>
+      <p class="orig">Please enter the <b>title</b> and <b>subtitle</b> (optional) of your timeline (they can be changed later) and the <b>beginning and ending years</b> for the <b>time axis</b> (BCE years are negative).</p>
+     <div class="error" style="display: none; text-align: center; color: red;"></div> 
+      <form id="startPanelForm" action="#" method="post">
+        <div class="textboxDiv">
+          <label for="title" style="width: 80px">Title: &nbsp;</label>
+          <input type="text" class="title" name="title" value="Foo" tabindex="1" 
+                 size="50" placeholder="Enter the timeline's title here" />
+                 <!-- for production, add autofocus here -->
         </div>      
-        <div>
-          <label for="subtitle">Subtitle: &nbsp;</label>
-          <input type="text" id="subtitle" name="subtitle" value="" tabindex="2" 
-                 size="50" placeholder="Enter the subtitle here"/>
+        <div class="textboxDiv">
+          <label for="subtitle" style="width: 80px">Subtitle: &nbsp;</label>
+          <input type="text" class="subtitle" name="subtitle" value="Bar" tabindex="2" 
+                 size="50" placeholder="Enter the subtitle here" />
         </div>      
-        <div>
+        <div class="textboxDiv">
           <label for="startYr" style="width: 200px">Begin Year: &nbsp;</label>
-          <input type="text" id="startYr" name="startYr" value="" tabindex="3" 
-                 size="6" placeholder="-1500"/>
+          <input type="text" class="startYr" name="startYr" value="-800" tabindex="3" 
+                 size="6" placeholder="-1500" />
           <label for="stopYr" style="top: 0; margin-left: 20px; float: none">End Year: &nbsp;</label>
-          <input type="text" id="stopYr" name="stopYr" value="" tabindex="4" 
-                 size="6" placeholder="2014"/>
+          <input type="text" class="stopYr" name="stopYr" value="-100" tabindex="4" 
+                 size="6" placeholder="2014" />
         </div>
-        <button class="doneBtn"/>Done</button>            
+        <button type="button" class="doneBtn"/>Done</button>            
       </form>    ​
     </div>
-    <div id="eraPanel" style="display: none;">
+    
+    <!-- ================================================================ -->
+    <div id="eraPanel1" class="panel">
       <h3>Step 2: Add Eras</h3>
-      <p>This is the place where one or more eras will be added to the timeline.  An era is a rectangle usually occupying the full height of the timeline and representing some background condition such as the name of the period (e.g., Persian Period) or the reign of a monarch (e.g., Louis XIV).</p>
-    </div
+      <p>Your <b>skeleton timeline</b> appears below.  You now enter the information about each of the <b>eras</b> you want to display, one at a time. An <b>era</b> is a rectangle usually occupying the full height of the timeline and representing some background condition such as the name of the period (e.g., Persian Period), the reign of a monarch (e.g., Louis XIV) or the like.</p>
+      <p></p>
+      <img src="images/eraExample.jpg" height="280" style="float: left; margin: 0 30px 10px 0;" alt="Image of an example Era" />
+      <br /><br />
+      <p>An era needs a label to identify it:</p>
+      <form id="eraPanel1Form" action="#" method="post">
+        <div class="textboxDiv">
+          <label for="label">Label: &nbsp;</label>
+          <input type="text" class="label" name="label" value="Persian Period" tabindex="1" 
+                 size="31" placeholder="Persian Period" />
+                 <!-- for production, add autofocus here -->
+        </div>      
+      <p>And a beginning and ending year</p>
+        <div class="textboxDiv">
+          <label for="startYr">BeginYear: &nbsp;</label>
+          <input type="text" class="startYr" name="startYr" value="-539" tabindex="2" 
+                 size="6" placeholder="-1500" />
+          <label for="stopYr" style="margin-left: 20px;">End Year: &nbsp;</label>
+          <input type="text" class="stopYr" name="stopYr" value="-332" tabindex="3" 
+                 size="6" placeholder="2014" />
+        </div>
+        <button type="button" class="doneBtn"/>Done</button>            
+      </form>    ​
+    </div>
   </div>
-  <div id="currentTLContainer" class="tlContainer"></div>
-  <script src="js/d3.v3.4.11.min.js"></script>
-  <script src="js/jquery-2.1.1.min.js"></script> 
+  <div id="currentTLContainer" class="tlContainer" style="display: none;"></div>
+  <script src="../js/d3.v3.4.11.min.js"></script>
+  <script src="../js/jquery-2.1.1.min.js"></script> 
   <script src="../js/historytimeline.js"></script>
   <script>
+    var currtl = new d3.tl.Timeline();
+    // an empty erasArr causes drawTimeAxis to use -1500/2014 defaults;
+    currtl.erasArr = [];
+
     $( document ).ready(function() {
-$("#startPanel .doneBtn").on("click", function (event) {
+// $("#startPanelForm .title").focus();
+
+$("#eraPanel1").css("display", "block");
+
+$("#startPanelForm .doneBtn").on("click", function (event) {
+  if (!validateStartPanel()) { return false; };
   $("#startPanel").slideUp(600, function () {
-    $("#eraPanel").slideDown(600);
+    currtl.title = $("#startPanelForm .title").val();
+    currtl.subtitle = $("#startPanelForm .subtitle").val();
+    currtl.axisStartYr = parseInt($("#startPanelForm .startYr").val());
+    currtl.axisStopYr  = parseInt($("#startPanelForm .stopYr").val());
+    currtl.setup("currentTLContainer");
+    currtl.draw();
+    $("#eraPanel1").slideDown(600, function () {
+      $("#currentTLContainer").slideDown(600);
+    });
   });
 });
+
+/* ========= HELPER FUNCTIONS =============================== */
+function validateStartPanel () {
+  // validate: title req, start < stop and numeric;
+  if ($("#startPanelForm .title").val() === "") {
+    showErrorMsg("#startPanel", "You need to provide a <b>title</b> for the timeline before we continue.<br />&nbsp;");
+    return false;
+  };
+  // coerce to numbers;
+  var startYr = parseInt($("#startPanelForm .startYr").val());
+  var stopYr  = parseInt($("#startPanelForm .stopYr").val());
+  if (!$.isNumeric(startYr)) {
+    showErrorMsg("#startPanel", "The <b>Begin Year</b> must be a number. If BCE it should be negative (-350).<br />&nbsp;");
+    $("#startPanelForm .startYr").focus();
+    return false;
+  };
+  if (!$.isNumeric(stopYr)) {
+    showErrorMsg("#startPanel", "The <b>End Year</b> must be a number. If BCE it should be negative (-350).<br />&nbsp;");
+    $("#startPanelForm .stopYr").focus();
+    return false;
+  };
+  if (startYr >= stopYr) {
+    showErrorMsg("#startPanel", "The <b>Begin Year</b> must come before the <b>End Year</b>. A year BCE should be negative (-350). Please change the incorrect one.");
+    return false;
+  };
+  return true;
+}
+
+function showErrorMsg (panelSel, msgHTML) {
+  $(panelSel + " .error").html(msgHTML);
+  $(panelSel + " .orig").hide();
+  $(panelSel + " .error").fadeIn();
+  $(panelSel + " .title").focus();
+}
     }); // END OF document.#ready
   </script>
 </body>

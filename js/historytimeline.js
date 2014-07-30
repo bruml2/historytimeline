@@ -27,9 +27,11 @@ d3.tl.Timeline = function (kind) {
   this.borderColor = "#A41034"; // Harvard Crimson;
   this.backgroundColor = "bisque";
   // runtime values:
+  this.dataOrigin = null;
+  this.axisStartYr = -1500;
+  this.axisStopYr  = 2014;
   this.timeScale = null;
   this.containerID = null;
-  this.dataOrigin = null;
   this.footerTextBuffer = null;
   
   this.erasArr = [ new d3.tl.Era() ];
@@ -200,17 +202,19 @@ d3.tl.Timeline.prototype.addFooterDiv = function (container) {
 };
 
 /* ======================================================================= */
-d3.tl.Timeline.prototype.drawTimeAxis = function (startYr, stopYr) {
-  // set up timescale for x-axis; 
-  var minDate = d3.min(this.erasArr, function(d){ return d.start });
-  var maxDate = d3.max(this.erasArr, function(d){ return d.stop });
-  if (startYr !== null && stopYr !== null && startYr < stopYr) {
-    minDate = startYr;
-    maxDate = stopYr;
+d3.tl.Timeline.prototype.drawTimeAxis = function () {
+  // set up timescale for x-axis;
+  // if the erasArr is empty (so no minDate/maxDate can be computed), then
+  // use values from axisStartYr and axisStopYr;
+  var minDate, maxDate;
+  if (this.erasArr.length === 0) {
+    minDate = this.axisStartYr;
+    maxDate = this.axisStopYr;
   } else {
-    if (startYr !== undefined) {console.log("startYr > stopYr problem")};
+    minDate = d3.min(this.erasArr, function(d){ return d.start });
+    maxDate = d3.max(this.erasArr, function(d){ return d.stop });
   }
-  // console.log("min/max: " + minDate + "/" + maxDate);
+  console.log("min/max: " + minDate + "/" + maxDate);
 
   this.timeScale = d3.scale.linear()
                           .domain([minDate, maxDate])
