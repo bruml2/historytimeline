@@ -171,7 +171,9 @@ img {
   <script src="../js/historytimeline.js"></script>
   <script>
     var currtl = new d3.tl.Timeline();
-    // an empty erasArr causes drawTimeAxis to use -1500/2014 defaults;
+    // set timeaxis defaults and empty erasArr;
+    currtl.axisStartYr = -1500;
+    currtl.axisStopYr  = 2014;
     currtl.erasArr = [];
 
     $( document ).ready(function() {
@@ -181,7 +183,7 @@ img {
 // $("#eraPanel2").css("display", "block");
 
 $("#startPanelForm .doneBtn").on("click", function (event) {
-  if (!validateStartPanel()) { return false; };
+  if (!validateStartPanel("#startPanelForm")) { return false; };
   $("#startPanel").slideUp(600, function () {
     currtl.title = $("#startPanelForm .title").val();
     currtl.subtitle = $("#startPanelForm .subtitle").val();
@@ -196,23 +198,31 @@ $("#startPanelForm .doneBtn").on("click", function (event) {
 });
 
 $("#eraPanel1Form .doneBtn").on("click", function (event) {
-  if (!validateEraPanel()) { return false; };
+  if (!validateEraPanel("#eraPanel1Form")) { return false; };
   $("#eraPanel1").slideUp(600, function () {
-    console.log("Before erasArr: ", currtl.erasArr);
-    // instantiate a new Era; transfer input values;
-    var newEra = new d3.tl.Era();
-    newEra.label = $("#eraPanel1Form .label").val();
-    newEra.start = $("#eraPanel1Form .startYr").val();
-    newEra.stop  = $("#eraPanel1Form .stopYr").val();
-    console.log("new era: ", newEra);
-    currtl.erasArr.push(newEra);
+    installNewEra("#eraPanel1Form");
     currtl.removeTimelineContents();
     currtl.draw();
     $("#eraPanel2").slideDown(600);
   });
 });
 
+$("#eraPanel2Form .doneBtn").on("click", function (event) {
+  if (!validateEraPanel("#eraPanel2Form")) { return false; };
+  $("#eraPanel2").slideUp(600, function () {
+    installNewEra("#eraPanel2Form");
+    currtl.removeTimelineContents();
+    currtl.draw();
+    // reset inputs;
+    $("#eraPanel2Form .label").val("");
+    $("#eraPanel2Form .startYr").val("");
+    $("#eraPanel2Form .stopYr").val("");
+    $("#eraPanel2").slideDown(600);
+  });
+});
+
 /* ========= AUTO TESTING =============================== */
+currtl.showD3selections = true;
 if (false) { autoTest(); };
 if (true) {
   $("h1").on("click", function () {
@@ -240,10 +250,23 @@ function autoTest () {
 }
 
 /* ========= HELPER FUNCTIONS =============================== */
+function installNewEra (panelForm) {
+  // instantiate a new Era; transfer input values;
+  var newEra = new d3.tl.Era();
+  newEra.label = $(panelForm + " .label").val();
+  newEra.start = $(panelForm + " .startYr").val();
+  newEra.stop  = $(panelForm + " .stopYr").val();
+  var oldNum = currtl.erasArr.length;
+  currtl.erasArr.push(newEra);
+  console.log("Was: " + oldNum + "; is: " + currtl.erasArr.length);
+  currtl.removeTimelineContents();
+  currtl.draw(); 
+}
+
 function validateStartPanel () {
   // validate: title req, start < stop and numeric;
   if ($("#startPanelForm .title").val() === "") {
-    showErrorMsg("#startPanel", "You need to provide a <b>title</b> for the timeline before we continue.<br />&nbsp;");
+    showErrorMsg("#startPanel", ".title", "You need to provide a <b>title</b> for the timeline before we continue.<br />&nbsp;");
     return false;
   };
   if (!validateStartStopYrs($("#startPanelForm .startYr").val(),
@@ -251,14 +274,19 @@ function validateStartPanel () {
   return true;
 }
 
-function validateEraPanel () {
+function validateEraPanel (panelForm) {
+  console.log("validateEraPanel: " + panelForm + "; label: **" +
+              $(panelForm + " .label").val() + "**");
   // validate: label req, start < stop and numeric;
-  if ($("#eraPanel1Form .label").val() === "") {
-    showErrorMsg("#startPanel", "You need to provide a <b>label</b> for the timeline before we continue.<br />&nbsp;");
+  if ($(panelForm + " .label").val() === "") {
+    // new 1st arg;
+    showErrorMsg("#startPanel", ".label", "You need to provide a <b>label</b> for the timeline before we continue.<br />&nbsp;");
     return false;
   };
-  if (!validateStartStopYrs($("#startPanelForm .startYr").val(),
-                            $("#startPanelForm .stopYr").val())) { return false; }
+  console.log("  start: " + $(panelForm + " .startYr").val() +
+              ";  stop: " + $(panelForm + " .stopYr").val());
+  if (!validateStartStopYrs($(panelForm + " .startYr").val(),
+                            $(panelForm + " .stopYr").val())) { return false; }
   return true;
 }
 
@@ -267,11 +295,11 @@ function validateStartStopYrs (startYr, stopYr) {
   startYr = parseInt(startYr);
   stopYr  = parseInt(stopYr);
   if (!$.isNumeric(startYr)) {
-    showErrorMsg("#startPanel", ".startYr", "The <b>Begin Year</b> must be a number. If BCE it should be negative (e.g., -350).<br />&nbsp;");
+    showErrorMsg("#startPanel", ".startYr", "The <b>Begin Year</b> must be a number. If BCE, it should be negative (e.g., -350).<br />&nbsp;");
     return false;
   };
   if (!$.isNumeric(stopYr)) {
-    showErrorMsg("#startPanel", ".stopYr", "The <b>End Year</b> must be a number. If BCE it should be negative (e.g., -350).<br />&nbsp;");
+    showErrorMsg("#startPanel", ".stopYr", "The <b>End Year</b> must be a number. If BCE, it should be negative (e.g., -350).<br />&nbsp;");
     return false;
   };
   if (startYr >= stopYr) {
