@@ -35,7 +35,7 @@ form label {
 #startPanelForm label {
   float: left;
 }
-#eraPanel1 {
+#eraPanel1, #eraPanel2 {
   display: none;
   overflow: hidden;
 }
@@ -90,21 +90,21 @@ img {
       <form id="startPanelForm" action="#" method="post">
         <div class="textboxDiv">
           <label for="title" style="width: 80px">Title: &nbsp;</label>
-          <input type="text" class="title" name="title" value="Foo" tabindex="1" 
+          <input type="text" class="title" name="title" value="" tabindex="1" 
                  size="50" placeholder="Enter the timeline's title here" />
                  <!-- for production, add autofocus here -->
         </div>      
         <div class="textboxDiv">
           <label for="subtitle" style="width: 80px">Subtitle: &nbsp;</label>
-          <input type="text" class="subtitle" name="subtitle" value="Bar" tabindex="2" 
+          <input type="text" class="subtitle" name="subtitle" value="" tabindex="2" 
                  size="50" placeholder="Enter the subtitle here" />
         </div>      
         <div class="textboxDiv">
           <label for="startYr" style="width: 200px">Begin Year: &nbsp;</label>
-          <input type="text" class="startYr" name="startYr" value="-800" tabindex="3" 
+          <input type="text" class="startYr" name="startYr" value="" tabindex="3" 
                  size="6" placeholder="-1500" />
           <label for="stopYr" style="top: 0; margin-left: 20px; float: none">End Year: &nbsp;</label>
-          <input type="text" class="stopYr" name="stopYr" value="-100" tabindex="4" 
+          <input type="text" class="stopYr" name="stopYr" value="" tabindex="4" 
                  size="6" placeholder="2014" />
         </div>
         <button type="button" class="doneBtn"/>Done</button>            
@@ -122,23 +122,49 @@ img {
       <form id="eraPanel1Form" action="#" method="post">
         <div class="textboxDiv">
           <label for="label">Label: &nbsp;</label>
-          <input type="text" class="label" name="label" value="Persian Period" tabindex="1" 
+          <input type="text" class="label" name="label" value="" tabindex="1" 
                  size="31" placeholder="Persian Period" />
                  <!-- for production, add autofocus here -->
         </div>      
       <p>And a beginning and ending year</p>
         <div class="textboxDiv">
           <label for="startYr">BeginYear: &nbsp;</label>
-          <input type="text" class="startYr" name="startYr" value="-539" tabindex="2" 
+          <input type="text" class="startYr" name="startYr" value="" tabindex="2" 
                  size="6" placeholder="-1500" />
           <label for="stopYr" style="margin-left: 20px;">End Year: &nbsp;</label>
-          <input type="text" class="stopYr" name="stopYr" value="-332" tabindex="3" 
+          <input type="text" class="stopYr" name="stopYr" value="" tabindex="3" 
                  size="6" placeholder="2014" />
         </div>
         <button type="button" class="doneBtn"/>Done</button>            
       </form>    ​
     </div>
-  </div>
+    
+    <!-- ================================================================ -->
+    <div id="eraPanel2" class="panel">
+      <h3>Step 3: Add Another Era</h3>
+      <p>You can see the result of adding the previous era below. If there is another era to add, enter the information here.  If not, leave all fields empty and just click on Done.</p>
+      <form id="eraPanel2Form" action="#" method="post">
+        <div class="textboxDiv">
+          <label for="label">Label: &nbsp;</label>
+          <input type="text" class="label" name="label" value="Helenistic Period" tabindex="1" 
+                 size="31" placeholder="Persian Period" />
+                 <!-- for production, add autofocus here -->
+        </div>      
+        <div class="textboxDiv">
+          <label for="startYr">BeginYear: &nbsp;</label>
+          <input type="text" class="startYr" name="startYr" value="-332" tabindex="2" 
+                 size="6" placeholder="-1500" />
+          <label for="stopYr" style="margin-left: 20px;">End Year: &nbsp;</label>
+          <input type="text" class="stopYr" name="stopYr" value="-168" tabindex="3" 
+                 size="6" placeholder="2014" />
+        </div>
+        <button type="button" class="doneBtn"/>Done</button>            
+      </form>    ​
+    </div>
+    
+    <!-- ================================================================ -->
+
+  </div> <!-- END OF htlBuilderContainer -->
   <div id="currentTLContainer" class="tlContainer" style="display: none;"></div>
   <script src="../js/d3.v3.4.11.min.js"></script>
   <script src="../js/jquery-2.1.1.min.js"></script> 
@@ -151,7 +177,8 @@ img {
     $( document ).ready(function() {
 // $("#startPanelForm .title").focus();
 
-$("#eraPanel1").css("display", "block");
+// $("#eraPanel1").css("display", "block");
+// $("#eraPanel2").css("display", "block");
 
 $("#startPanelForm .doneBtn").on("click", function (event) {
   if (!validateStartPanel()) { return false; };
@@ -163,10 +190,54 @@ $("#startPanelForm .doneBtn").on("click", function (event) {
     currtl.setup("currentTLContainer");
     currtl.draw();
     $("#eraPanel1").slideDown(600, function () {
-      $("#currentTLContainer").slideDown(600);
+      $("#currentTLContainer").fadeIn(600);
     });
   });
 });
+
+$("#eraPanel1Form .doneBtn").on("click", function (event) {
+  if (!validateEraPanel()) { return false; };
+  $("#eraPanel1").slideUp(600, function () {
+    console.log("Before erasArr: ", currtl.erasArr);
+    // instantiate a new Era; transfer input values;
+    var newEra = new d3.tl.Era();
+    newEra.label = $("#eraPanel1Form .label").val();
+    newEra.start = $("#eraPanel1Form .startYr").val();
+    newEra.stop  = $("#eraPanel1Form .stopYr").val();
+    console.log("new era: ", newEra);
+    currtl.erasArr.push(newEra);
+    currtl.removeTimelineContents();
+    currtl.draw();
+    $("#eraPanel2").slideDown(600);
+  });
+});
+
+/* ========= AUTO TESTING =============================== */
+if (false) { autoTest(); };
+if (true) {
+  $("h1").on("click", function () {
+    autoTest();
+  });
+};
+
+function autoTest2 () {
+  $("#eraPanel1Form .label").val("Persian Period");
+  $("#eraPanel1Form .startYr").val("-539");
+  $("#eraPanel1Form .stopYr").val("-332");
+  $("#eraPanel1Form .doneBtn").trigger("click");
+  
+  console.log("END OF AUTOTEST");
+}
+
+function autoTest () {
+  $("#startPanelForm .title").val("The Hebrew Bible");
+  $("#startPanelForm .subtitle").val("(automated testing)");
+  $("#startPanelForm .startYr").val("-1100");
+  $("#startPanelForm .stopYr").val("100");
+  $("#startPanelForm .doneBtn").trigger("click");
+  
+  window.setTimeout(autoTest2, 2500);
+}
 
 /* ========= HELPER FUNCTIONS =============================== */
 function validateStartPanel () {
@@ -175,31 +246,46 @@ function validateStartPanel () {
     showErrorMsg("#startPanel", "You need to provide a <b>title</b> for the timeline before we continue.<br />&nbsp;");
     return false;
   };
+  if (!validateStartStopYrs($("#startPanelForm .startYr").val(),
+                            $("#startPanelForm .stopYr").val())) { return false; }
+  return true;
+}
+
+function validateEraPanel () {
+  // validate: label req, start < stop and numeric;
+  if ($("#eraPanel1Form .label").val() === "") {
+    showErrorMsg("#startPanel", "You need to provide a <b>label</b> for the timeline before we continue.<br />&nbsp;");
+    return false;
+  };
+  if (!validateStartStopYrs($("#startPanelForm .startYr").val(),
+                            $("#startPanelForm .stopYr").val())) { return false; }
+  return true;
+}
+
+function validateStartStopYrs (startYr, stopYr) {
   // coerce to numbers;
-  var startYr = parseInt($("#startPanelForm .startYr").val());
-  var stopYr  = parseInt($("#startPanelForm .stopYr").val());
+  startYr = parseInt(startYr);
+  stopYr  = parseInt(stopYr);
   if (!$.isNumeric(startYr)) {
-    showErrorMsg("#startPanel", "The <b>Begin Year</b> must be a number. If BCE it should be negative (-350).<br />&nbsp;");
-    $("#startPanelForm .startYr").focus();
+    showErrorMsg("#startPanel", ".startYr", "The <b>Begin Year</b> must be a number. If BCE it should be negative (e.g., -350).<br />&nbsp;");
     return false;
   };
   if (!$.isNumeric(stopYr)) {
-    showErrorMsg("#startPanel", "The <b>End Year</b> must be a number. If BCE it should be negative (-350).<br />&nbsp;");
-    $("#startPanelForm .stopYr").focus();
+    showErrorMsg("#startPanel", ".stopYr", "The <b>End Year</b> must be a number. If BCE it should be negative (e.g., -350).<br />&nbsp;");
     return false;
   };
   if (startYr >= stopYr) {
-    showErrorMsg("#startPanel", "The <b>Begin Year</b> must come before the <b>End Year</b>. A year BCE should be negative (-350). Please change the incorrect one.");
+    showErrorMsg("#startPanel", ".startYr", "The <b>Begin Year</b> must come before the <b>End Year</b>. A year BCE should be negative (e.g., -350). Please change the incorrect one.");
     return false;
   };
   return true;
 }
 
-function showErrorMsg (panelSel, msgHTML) {
+function showErrorMsg (panelSel, textboxClass, msgHTML) {
   $(panelSel + " .error").html(msgHTML);
   $(panelSel + " .orig").hide();
   $(panelSel + " .error").fadeIn();
-  $(panelSel + " .title").focus();
+  $(panelSel + "Form " + textboxClass).focus();
 }
     }); // END OF document.#ready
   </script>
