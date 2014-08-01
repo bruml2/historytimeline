@@ -64,12 +64,16 @@ d3.tl.Timeline = function (kind) {
   this.hasEvents = false;
   this.hasPeople = false;
   this.hasEmblems = false;
-  
+  // runtime states (displayControlPanel);
   this.showingDates = false;
   this.showingAll   = false;
   // D3 selections:
-  this.D3svg = null;
-  this.D3erasGrp = null;
+  this.D3timeline = null;  // inside the container;
+  this.D3svg      = null;
+  this.D3eras     = null;
+  this.D3erasGrp  = null;
+  this.D3eraLabelsGrp = null;
+  this.D3eraDatesGrps = null;
 };
 
 /* =============  Timeline load method ====================== */
@@ -133,30 +137,22 @@ d3.tl.Timeline.prototype.addTimelineDiv = function (container) {
   };
   // grab TimelineObj because "this" is set to current selection el below;
   var t = this;
-  this.D3timeline = d3.select("#" + container)
+  d3.select("#" + container)
       .style(t.containerStyles)
     .append("div")
       .attr("id", container + "-timeline")
       .attr("class", "historytimeline")
       .style({"position": "relative"})
-    .each(function() {
-      // inside the <div>, place an svg and a div;
       // "this" is redefined as current selection el;
-      d3.select(this).append("svg")
-        // .attr("class", "svg")
-        .style({"width": t.svgWidth,
-                "height": t.svgHeight,
-                "border": "2px solid " + t.borderColor,
-                "background-color": t.backgroundColor});
-      d3.select(this).append("div")
-        .attr("class", "precipEventsPanel");
-    });
-  t.D3svg = d3.select("#" + container + "-timeline svg");            
-  t.D3precipEventsPanel =
-            d3.select("#" + container + "-timeline .precipEventsPanel");            
+    .append("svg")
+      .style({"width": t.svgWidth,
+              "height": t.svgHeight,
+              "border": "2px solid " + t.borderColor,
+              "background-color": t.backgroundColor});
+  this.D3timeline = d3.select("#" + container + "-timeline");
+  this.D3svg = d3.select("#" + container + "-timeline svg");            
   // add the styles once for all timelines on the page;
   if (document.getElementById("globalTimelineStyles") === null) {
-    console.log("Adding globalTimelineStyles to body");
     d3.select("body").append("style")
       .attr("id", "globalTimelineStyles")
       .text(".timeAxisGrp path, .timeAxisGrp line {" +
@@ -238,8 +234,8 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
   // if targetEraLabel is specified, others are 50% opacity;
   // grab TimelineObj because "this" is set to current selection el below;
   var t = this;
-  // D3erasGrp is a selection array of all the rects;
-  this.D3erasGrp = this.D3svg.append("g")
+  // D3eras is a selection of all the rects;
+  this.D3eras = this.D3svg.append("g")
       .attr("class", "erasGrp")
       .selectAll("rect")
       .data(this.erasArr)
@@ -318,7 +314,7 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
         }
       });  // end of mouseout;
   if (targetEraLabel) {
-    this.D3erasGrp.each(function(d, i) {
+    this.D3eras.each(function(d, i) {
       if (this.__data__.label === targetEraLabel) {
         d3.select(this).style("stroke-width", 2);
       } else {
@@ -326,6 +322,12 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
       }
     });
   };
+  this.D3timeline.append("div")
+    .attr("class", "precipEventsPanel");
+  this.D3precipEventsPanel =
+            d3.select("#" + this.containerID + "-timeline .precipEventsPanel");            
+  // grab the <g> element for later delete;
+  this.D3erasGrp = d3.select("#" + this.containerID + "-timeline .erasGrp");
 };
 
 /* ======================================================================= */
@@ -369,8 +371,9 @@ d3.tl.Timeline.prototype.drawEraLabels = function (targetLabel) {
       return offsetLeft + "px";
     }
   } // end of getLeftAndStoreWidthVoffset();
+  // NB that labels do NOT go into svg element but after it;
   this.D3timeline.append("g")
-      .attr("id", "eraLabelsGrp")
+      .attr("class", "eraLabelsGrp")
       .selectAll("div")
       .data(this.erasArr)
       .enter()
@@ -401,6 +404,9 @@ d3.tl.Timeline.prototype.drawEraLabels = function (targetLabel) {
                 return 1} else { return 0.5}; })
       .style("pointer-events", "none")
       .text(function(d){ return d.label });
+  // grab the group itself for later delete;
+  this.D3eraLabelsGrp = d3.select("#" + this.containerID + "-timeline .eraLabelsGrp");
+
   // finished with span!
   widthSpan.remove();
 };
@@ -436,6 +442,8 @@ d3.tl.Timeline.prototype.drawEraDates = function () {
   addEraDates("start");
   addEraDates("stop");
   
+  this.D3eraDatesGrps =
+             d3.selectAll("#" + t.containerID + "-timeline .eraDateGrp");
   console.log("Num eraDate elements: " +
    d3.selectAll("#" + t.containerID + "-timeline .eraDate")[0].length);   
 };
@@ -498,6 +506,32 @@ d3.tl.Timeline.prototype.draw = function (targetEra) {
   this.drawEraLabels(targetEra);
   this.drawEraDates();
   if (this.hasEvents) { this.drawEvents(); };
+  
+  // debug:
+  console.log("D3svg: ", this.D3svg);
+  console.log("D3erasGrp: ", this.D3erasGrp);
+  console.log("D3eras: ", this.D3eras);
+  console.log("D3eraLabelsGrp: ", this.D3eraLabelsGrp);
+  console.log("D3eraDatesGrps: ", this.D3eraDatesGrps);
+};
+
+/* ======================================================================= */
+d3.tl.Timeline.prototype.removeTimelineContents = function () {
+  console.log("IN removeTimelineContents");
+  
+  var svg = document.querySelector("#" + this.containerID + "-timeline svg");
+  while (svg.firstChild) {
+    console.log("Removing: ", svg.firstChild);
+    svg.removeChild(svg.firstChild);
+  }
+  // deletes precipEventsPanel;
+  d3.select("#" + this.containerID + "-timeline .precipEventsPanel").remove();
+  
+  /*
+  this.D3erasGrp.remove();
+  this.D3eraLabelsGrp.remove();
+  this.D3eraDatesGrps.remove();
+  */
 };
 
 /* ========== END OF CODE ================================================ */
