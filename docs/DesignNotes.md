@@ -68,10 +68,23 @@ A loaded timeline may be modified in any respect by loading the custom property 
       <g class="eraStopDateGrp"></g>
     </svg>
     <g class="eraLabelsGrp">
-    <div id="">
+    <div id="precipEventsPanel">
   </div>
   <div id="containerID-footer"></div>
 </div>
+
+==== DATES USED TO CREATE TIME AXIS:
+
+For a completed timeline, the endpoints of the time axis are taken from the earliest and latest eras.  [Should also take into account other objects such as events and people.]
+
+When a timeline is being built, it starts out with an empty erasArr; as a result, the endpoints are taken from this.axisStartYr and this.axisStopYr which are specified by the user in the startPanel (defaults: -1500 and 2014).
+
+During the building process, we want to retain the use of the originally specified endpoints so if this.axisStartYr and this.axisStopYr are not null, they continue to be used.  When the last era has been added, they are set to null and the values are stored in this.builderMinMax as properties.  If the user wants to return to using the original values (checkbox?), then they are restored to this.axisStartYr and this.axisStopYr.
+
+==== TO DO
+get doneBtn to work on eraPanel2;
+color the eras as they are added;
+
 
 
 
