@@ -28,8 +28,8 @@ d3.tl.Timeline = function (kind) {
   this.backgroundColor = "bisque";
   // runtime values:
   this.dataOrigin = null;
-  this.axisStartYr = -1500;
-  this.axisStopYr  = 2014;
+  this.axisStartYr = null;  // used when not null;
+  this.axisStopYr  = null;
   this.timeScale = null;
   this.containerID = null;
   this.footerTextBuffer = null;
@@ -74,6 +74,10 @@ d3.tl.Timeline = function (kind) {
   this.D3erasGrp  = null;
   this.D3eraLabelsGrp = null;
   this.D3eraDatesGrps = null;
+  // Builder state:
+  this.builderMinMax = {}; // props: minDate, maxDate;
+  // debug:
+  this.showD3selections = false;
 };
 
 /* =============  Timeline load method ====================== */
@@ -200,10 +204,9 @@ d3.tl.Timeline.prototype.addFooterDiv = function (container) {
 /* ======================================================================= */
 d3.tl.Timeline.prototype.drawTimeAxis = function () {
   // set up timescale for x-axis;
-  // if the erasArr is empty (so no minDate/maxDate can be computed), then
-  // use values from axisStartYr and axisStopYr;
+  // if axisStartYr and axisStopYr are not null, then use those values instead of computing from eras (e.g., empty timeline or during building;
   var minDate, maxDate;
-  if (this.erasArr.length === 0) {
+  if (this.axisStartYr !== null && this.axisStopYr !== null) {
     minDate = this.axisStartYr;
     maxDate = this.axisStopYr;
   } else {
@@ -508,30 +511,29 @@ d3.tl.Timeline.prototype.draw = function (targetEra) {
   if (this.hasEvents) { this.drawEvents(); };
   
   // debug:
-  console.log("D3svg: ", this.D3svg);
-  console.log("D3erasGrp: ", this.D3erasGrp);
-  console.log("D3eras: ", this.D3eras);
-  console.log("D3eraLabelsGrp: ", this.D3eraLabelsGrp);
-  console.log("D3eraDatesGrps: ", this.D3eraDatesGrps);
+  if (this.showD3selections === true) {
+    console.log("D3timeline: ", this.D3timeline);
+    console.log("D3svg: ", this.D3svg);
+    console.log("D3erasGrp: ", this.D3erasGrp);
+    console.log("D3eras: ", this.D3eras);
+    console.log("D3eraLabelsGrp: ", this.D3eraLabelsGrp);
+    console.log("D3eraDatesGrps: ", this.D3eraDatesGrps);
+    }
 };
 
 /* ======================================================================= */
 d3.tl.Timeline.prototype.removeTimelineContents = function () {
   console.log("IN removeTimelineContents");
-  
+  // delete contents of svg;
   var svg = document.querySelector("#" + this.containerID + "-timeline svg");
   while (svg.firstChild) {
     console.log("Removing: ", svg.firstChild);
     svg.removeChild(svg.firstChild);
   }
-  // deletes precipEventsPanel;
+  // delete precipEventsPanel;
   d3.select("#" + this.containerID + "-timeline .precipEventsPanel").remove();
-  
-  /*
-  this.D3erasGrp.remove();
-  this.D3eraLabelsGrp.remove();
-  this.D3eraDatesGrps.remove();
-  */
+  // delete eraLabelsGrp;
+  d3.select("#" + this.containerID + "-timeline .eraLabelsGrp").remove();
 };
 
 /* ========== END OF CODE ================================================ */
