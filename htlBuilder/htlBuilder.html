@@ -35,7 +35,7 @@ form label {
 #startPanelForm label {
   float: left;
 }
-#eraPanel1, #eraPanel2 {
+#eraPanel1, #eraPanel2, #nextStepPanel {
   display: none;
   overflow: hidden;
 }
@@ -80,6 +80,7 @@ img {
 </head>
 <body>
   <h1>History Timeline Builder UI</h1>
+  <div id="tlArr"></div>
   <div id="htlBuilderContainer" class="tlContainer">
     
     <!-- ================================================================ -->
@@ -146,20 +147,33 @@ img {
       <form id="eraPanel2Form" action="#" method="post">
         <div class="textboxDiv">
           <label for="label">Label: &nbsp;</label>
-          <input type="text" class="label" name="label" value="Helenistic Period" tabindex="1" 
+          <input type="text" class="label" name="label" value="" tabindex="1" 
                  size="31" placeholder="Persian Period" />
                  <!-- for production, add autofocus here -->
         </div>      
         <div class="textboxDiv">
           <label for="startYr">BeginYear: &nbsp;</label>
-          <input type="text" class="startYr" name="startYr" value="-332" tabindex="2" 
+          <input type="text" class="startYr" name="startYr" value="" tabindex="2" 
                  size="6" placeholder="-1500" />
           <label for="stopYr" style="margin-left: 20px;">End Year: &nbsp;</label>
-          <input type="text" class="stopYr" name="stopYr" value="-168" tabindex="3" 
+          <input type="text" class="stopYr" name="stopYr" value="" tabindex="3" 
                  size="6" placeholder="2014" />
         </div>
-        <button type="button" class="doneBtn"/>Done</button>            
+        <button type="button" class="doneBtn" tabindex="4">Done</button>            
       </form>    ​
+    </div>
+    
+    <!-- ================================================================ -->
+    <div id="nextStepPanel" class="panel">
+      <h3>Several options for proceeding:</h3>
+      <p>If you need to change any of the information entered about eras or you want to modify the default values of advanced properties, click <b>Edit Eras</b>.</p>
+      <p>To add graphic elements which represent one-time events, click <b>Add Events</b>.</p>
+      <p>To add graphic elements which describe people (their lifetimes, their active periods, their reigns), click <b>Add People</b>.</p>
+      <div class="buttonsDiv" style="text-align: center;">
+        <button type="button" class="editEras">Edit Eras</button><br />
+        <button type="button" class="addEvents">Add Events</button><br />
+        <button type="button" class="addPeople">Add People</button>
+      </div>            
     </div>
     
     <!-- ================================================================ -->
@@ -175,18 +189,32 @@ img {
     currtl.axisStartYr = -1500;
     currtl.axisStopYr  = 2014;
     currtl.erasArr = [];
+    currtl.bgcolorsArr = [ "#A9BCF5", "#F5BCA9", "#F5A9E1", "#F5A9BC",
+                           "#F78181", "#A9BCF5", "#A9E2F3", "#F5A9E1",
+                           "#F5BCA9",
+                           "#A9BCF5", "#F5BCA9", "#F5A9E1", "#F5A9BC",
+                           "#F78181", "#A9BCF5", "#A9E2F3", "#F5A9E1",
+                           "#F5BCA9" ];
 
     $( document ).ready(function() {
-// $("#startPanelForm .title").focus();
+// for production, add autofocus attribute to HTML forms;
 
-// $("#eraPanel1").css("display", "block");
-// $("#eraPanel2").css("display", "block");
+d3.tl.storedTimelinesArr = null;
+// debug:
+localStorage.removeItem("timelines");
+localStorage.clear();
+tlArr = getStoredTimelines();
+saveTimelinesToStorage(tlArr);
+// console.log("JSON: " + localStorage.getItem("timelines"));
+// console.log("HTML: " + generateDisplayHTML(tlArr));
+$("#tlArr").html(generateDisplayHTML(tlArr));
 
 $("#startPanelForm .doneBtn").on("click", function (event) {
+  $(event.target).attr("disabled", "true");
   if (!validateStartPanel("#startPanelForm")) { return false; };
   $("#startPanel").slideUp(600, function () {
-    currtl.title = $("#startPanelForm .title").val();
-    currtl.subtitle = $("#startPanelForm .subtitle").val();
+    currtl.title    = $.trim($("#startPanelForm .title").val());
+    currtl.subtitle = $.trim($("#startPanelForm .subtitle").val());
     currtl.axisStartYr = parseInt($("#startPanelForm .startYr").val());
     currtl.axisStopYr  = parseInt($("#startPanelForm .stopYr").val());
     currtl.setup("currentTLContainer");
@@ -198,9 +226,10 @@ $("#startPanelForm .doneBtn").on("click", function (event) {
 });
 
 $("#eraPanel1Form .doneBtn").on("click", function (event) {
+  $(event.target).attr("disabled", "true");
   if (!validateEraPanel("#eraPanel1Form")) { return false; };
   $("#eraPanel1").slideUp(600, function () {
-    installNewEra("#eraPanel1Form");
+    installNewEra("#eraPanel1Form", currtl.bgcolorsArr.shift());
     currtl.removeTimelineContents();
     currtl.draw();
     $("#eraPanel2").slideDown(600);
@@ -208,21 +237,34 @@ $("#eraPanel1Form .doneBtn").on("click", function (event) {
 });
 
 $("#eraPanel2Form .doneBtn").on("click", function (event) {
+  $(event.target).attr("disabled", true);
+  if (eraPanel2IsEmpty()) {
+    console.log("Empty");
+    // store timeline in current state;
+    addTimelineToStorage(currtl);
+    $("#tlArr").html(generateDisplayHTML(tlArr));
+    $("#eraPanel2").slideUp(600, function () {
+      $("#nextStepPanel").slideDown(600);
+    });
+  };
   if (!validateEraPanel("#eraPanel2Form")) { return false; };
   $("#eraPanel2").slideUp(600, function () {
-    installNewEra("#eraPanel2Form");
+    installNewEra("#eraPanel2Form", currtl.bgcolorsArr.shift());
     currtl.removeTimelineContents();
     currtl.draw();
+    // change headline;
+    $("#eraPanel2 h3").html("&nbsp;&nbsp;Continue adding eras:");
     // reset inputs;
     $("#eraPanel2Form .label").val("");
     $("#eraPanel2Form .startYr").val("");
     $("#eraPanel2Form .stopYr").val("");
+    $("#eraPanel2Form .doneBtn").attr("disabled", false);
     $("#eraPanel2").slideDown(600);
   });
 });
 
 /* ========= AUTO TESTING =============================== */
-currtl.showD3selections = true;
+currtl.showD3selectionsInConsole = false;
 if (false) { autoTest(); };
 if (true) {
   $("h1").on("click", function () {
@@ -230,13 +272,34 @@ if (true) {
   });
 };
 
+function autoTest4 () {
+  $("#eraPanel2Form .label").val("Maccabean (Hasmonean) Rule");
+  $("#eraPanel2Form .startYr").val("-168");
+  $("#eraPanel2Form .stopYr").val("-63");
+  $("#eraPanel2Form .doneBtn").trigger("click");
+  
+  // store this new timeline;
+  
+  // displayStoredTimelines();
+  console.log("END OF AUTOTEST");
+}
+
+function autoTest3 () {
+  $("#eraPanel2Form .label").val("Helenistic Period");
+  $("#eraPanel2Form .startYr").val("-332");
+  $("#eraPanel2Form .stopYr").val("-168");
+  $("#eraPanel2Form .doneBtn").trigger("click");
+  
+  window.setTimeout(autoTest4, 2500);
+}
+
 function autoTest2 () {
   $("#eraPanel1Form .label").val("Persian Period");
   $("#eraPanel1Form .startYr").val("-539");
   $("#eraPanel1Form .stopYr").val("-332");
   $("#eraPanel1Form .doneBtn").trigger("click");
   
-  console.log("END OF AUTOTEST");
+  window.setTimeout(autoTest3, 2500);
 }
 
 function autoTest () {
@@ -250,15 +313,34 @@ function autoTest () {
 }
 
 /* ========= HELPER FUNCTIONS =============================== */
-function installNewEra (panelForm) {
+function addTimelineToStorage (currtl) {
+  // assign serial id;
+  var highestExistingID = tlArr[tlArr.length -1].tlid;
+  currtl.tlid = highestExistingID + 1;
+  currtl.lastModified = new Date();
+  console.log("Before: ", tlArr.length);
+  tlArr.push(currtl);
+  console.log("After:  ", tlArr.length);
+  console.log(currtl);
+  saveTimelinesToStorage(tlArr);
+}
+
+function eraPanel2IsEmpty () {
+  var retVal = true;
+  $("#eraPanel2Form input").each( function (idx) {
+    if ($(this).val() !== "") { retVal = false; };
+  });
+  return retVal;
+}
+
+function installNewEra (panelForm, bgcolor) {
   // instantiate a new Era; transfer input values;
   var newEra = new d3.tl.Era();
   newEra.label = $(panelForm + " .label").val();
   newEra.start = $(panelForm + " .startYr").val();
   newEra.stop  = $(panelForm + " .stopYr").val();
-  var oldNum = currtl.erasArr.length;
+  if (bgcolor) { newEra.bgcolor = bgcolor; };
   currtl.erasArr.push(newEra);
-  console.log("Was: " + oldNum + "; is: " + currtl.erasArr.length);
   currtl.removeTimelineContents();
   currtl.draw(); 
 }
@@ -315,6 +397,59 @@ function showErrorMsg (panelSel, textboxClass, msgHTML) {
   $(panelSel + " .error").fadeIn();
   $(panelSel + "Form " + textboxClass).focus();
 }
+
+/* ==================================================================
+         LOCAL STORAGE
+         
+   setItem(str, str); getItem(str); removeItem(str); clear(); length();
+   key(idx) => str
+         
+   Timelines are stored with the key "timelines" as an array of timeline
+   objects:
+    [ {"tlid": 1, "title": "The Hebrew Bible", . . .} ... ]
+   ================================================================== */
+
+function getStoredTimelines() {
+  // if not present, initialize;
+  var tlArr = JSON.parse(localStorage.getItem("timelines")) ||
+              [ 
+                {"tlid": 5, "title": "Dummy Timeline5"},
+                {"tlid": 2, "title": "Dummy Timeline2"},
+                {"tlid": 10, "title": "Dummy Timeline10"},
+                {"tlid": 8, "title": "Dummy Timeline8"}
+              ];
+
+  // console.log("Before: ", tlArr);
+  // sort on tlid;
+  tlArr = tlArr.sort(function (a, b) { return a.tlid - b.tlid; });
+  // console.log("After:  ", tlArr);
+  
+  return tlArr;
+}
+
+function saveTimelinesToStorage(tlArr) {
+  try {
+    localStorage.setItem("timelines", JSON.stringify(tlArr));
+  } catch (e) {
+    if (e == QUOTA_EXCEEDED_ERR) { alert("Quota exceeded!"); }
+  }
+}
+
+function generateDisplayHTML (tlArr) {
+  var html = "<ol>";
+  tlArr.forEach( function (tl) {
+    html += "<li><span class=\"id\">" + tl.tlid + ": </span>" +
+                "<span class=\"title\">" + tl.title + "</span>" +
+            "</li>";
+  });
+  return html + "</ol>";
+}
+
+
+function addTimelineToStorage (tl) {
+}
+
+/* =================================================================== */
     }); // END OF document.#ready
   </script>
 </body>
