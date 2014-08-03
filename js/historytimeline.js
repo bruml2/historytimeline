@@ -11,10 +11,17 @@ d3.tl.Era = function (label, start, stop, bgcolor) {
   this.topY    = 0;
   this.height  = 1.0;
   this.voffset = 0;
+  // overides timeline-wide values;  (TO DO)
+  this.labelFontSize   = null;
+  this.labelFontFamily = null;
+  this.labelTopMargin  = null;
+  this.dateFontSize    = null;
 };
 
 /* =============  Timeline constructor ====================== */
 d3.tl.Timeline = function (kind) {
+  this.tlid = null;        // local storage id assigned by Builder;
+  this.dataOrigin = null;  // name of individual file containing TL;
   this.title = "Placeholder Title:";
   this.subtitle = "Subtitle Placeholder";
   this.eraTopMargin = 30;
@@ -68,7 +75,7 @@ d3.tl.Timeline = function (kind) {
   this.showingDates = false;
   this.showingAll   = false;
   // D3 selections:
-  this.D3timeline = null;  // inside the container;
+  this.D3timeline = null;  // 2nd div inside the container;
   this.D3svg      = null;
   this.D3eras     = null;
   this.D3erasGrp  = null;
@@ -76,8 +83,10 @@ d3.tl.Timeline = function (kind) {
   this.D3eraDatesGrps = null;
   // Builder state:
   this.builderMinMax = {}; // props: minDate, maxDate;
+  this.created = new Date();
+  this.lastModified = new Date();
   // debug:
-  this.showD3selections = false;
+  this.showD3selectionsInConsole = false;
 };
 
 /* =============  Timeline load method ====================== */
@@ -213,7 +222,7 @@ d3.tl.Timeline.prototype.drawTimeAxis = function () {
     minDate = d3.min(this.erasArr, function(d){ return d.start });
     maxDate = d3.max(this.erasArr, function(d){ return d.stop });
   }
-  console.log("min/max: " + minDate + "/" + maxDate);
+  // console.log("min/max: " + minDate + "/" + maxDate);
 
   this.timeScale = d3.scale.linear()
                           .domain([minDate, maxDate])
@@ -447,8 +456,8 @@ d3.tl.Timeline.prototype.drawEraDates = function () {
   
   this.D3eraDatesGrps =
              d3.selectAll("#" + t.containerID + "-timeline .eraDateGrp");
-  console.log("Num eraDate elements: " +
-   d3.selectAll("#" + t.containerID + "-timeline .eraDate")[0].length);   
+  // console.log("Num eraDate elements: " +
+  //  d3.selectAll("#" + t.containerID + "-timeline .eraDate")[0].length);   
 };
 
 /* ======================================================================= */
@@ -511,7 +520,7 @@ d3.tl.Timeline.prototype.draw = function (targetEra) {
   if (this.hasEvents) { this.drawEvents(); };
   
   // debug:
-  if (this.showD3selections === true) {
+  if (this.showD3selectionsInConsole === true) {
     console.log("D3timeline: ", this.D3timeline);
     console.log("D3svg: ", this.D3svg);
     console.log("D3erasGrp: ", this.D3erasGrp);
@@ -523,11 +532,10 @@ d3.tl.Timeline.prototype.draw = function (targetEra) {
 
 /* ======================================================================= */
 d3.tl.Timeline.prototype.removeTimelineContents = function () {
-  console.log("IN removeTimelineContents");
   // delete contents of svg;
   var svg = document.querySelector("#" + this.containerID + "-timeline svg");
   while (svg.firstChild) {
-    console.log("Removing: ", svg.firstChild);
+    // console.log("Removing from svg: ", svg.firstChild);
     svg.removeChild(svg.firstChild);
   }
   // delete precipEventsPanel;
