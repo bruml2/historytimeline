@@ -22,18 +22,33 @@ d3.tl.Era = function (label, start, stop, bgcolor) {
 d3.tl.Timeline = function (kind) {
   this.tlid = null;        // local storage id assigned by Builder;
   this.dataOrigin = null;  // name of individual file containing TL;
+  this.scale = 1;
   this.title = "Placeholder Title:";
   this.subtitle = "Subtitle Placeholder";
   this.eraTopMargin = 30;
   this.eraHeight = 300;
   this.timeAxisHeight = 50;
   this.timeAxisTopMargin = 15;
+  this.timeAxisFontSize = 13;
   this.svgHeight = this.eraTopMargin + this.eraHeight + this.timeAxisHeight;  // 380
   this.svgWidth = 1200;
   if (kind === "eraUI") { this.svgWidth = 500;};
   this.svgSideMargin = 25;
   this.borderColor = "#A41034"; // Harvard Crimson;
   this.backgroundColor = "bisque";
+  this.titleFontSize = 24;
+  this.subtitleFontSize = 18;
+  this.headerPaddingTop = 20;
+  this.headerPaddingSides = 30;
+  this.headerPadding = this.headerPaddingTop + "px " +
+                       this.headerPaddingSides + "px";
+  this.headerMarginBottom = 20;
+  this.footerFontSize = 12;
+  this.footerPaddingTop = 10;
+  this.footerPaddingSides = 15;
+  this.footerPadding = this.footerPaddingTop + "px " +
+                       this.footerPaddingSides + "px";
+  this.footerMarginTop = 20;
   // runtime values:
   this.dataOrigin = null;
   this.axisStartYr = null;  // used when not null;
@@ -58,12 +73,7 @@ d3.tl.Timeline = function (kind) {
   this.footerHTML = "<span class=\"drawnBy\">Drawn by historytimeline.js. " +
                     "(<a href=\"https://github.com/bruml2/historytimeline\">Info " +
                     "and code</a>)</span>";
-  this.footerStyles = function () {
-               return {"padding": "10px 15px",
-                       "margin-top": "20px",
-                       "border": "2px solid " + this.borderColor,
-                       "font-size": "12px"}
-  };
+
   // can be turned off or on;
   this.hasFooter = true;
   this.hasEraDatesOnHover = true;
@@ -115,16 +125,28 @@ d3.tl.Timeline.prototype.loadTimeline = function (tlObj) {
   }
 };
 
+/* =============  Timeline setup methods ====================== */
 d3.tl.Timeline.prototype.scaleTimeline = function (scaleBy) {
   // the default width is 1200px; scaleBy arg (0.1 to n);
-  t = this;
+  var t = this;
+  t.scale = scaleBy;
   var scaleable = [
     "eraTopMargin",
     "eraHeight",
     "timeAxisHeight",
     "timeAxisTopMargin",
+    "timeAxisFontSize",
     "svgWidth",
     "svgSideMargin",
+    "titleFontSize",
+    "subtitleFontSize",
+    "headerPaddingTop",
+    "headerPaddingSides",
+    "headerMarginBottom",
+    "footerFontSize",
+    "footerPaddingTop",
+    "footerPaddingSides",
+    "footerMarginTop",
     "eraLabelTopMargin",
     "eraLabelsFontSize",
     "eraDateFontSize"
@@ -135,32 +157,36 @@ d3.tl.Timeline.prototype.scaleTimeline = function (scaleBy) {
   });
 
   this.svgHeight = this.eraTopMargin + this.eraHeight + this.timeAxisHeight;
+  this.headerPadding = this.headerPaddingTop + "px " +
+                       this.headerPaddingSides + "px";
+  this.footerPadding = this.footerPaddingTop + "px " +
+                       this.footerPaddingSides + "px";
 };
 
-/* =============  Timeline setup methods ====================== */
 d3.tl.Timeline.prototype.addHeaderDiv = function (container) {
   this.containerID = container;
   // "this" is set to current selection el in .each loop below;
   var t = this;
+  console.log("HMB: " + t.headerMarginBottom);
   d3.select("#" + container)
       .style(t.containerStyles)
     .append("div")
       .attr("id", container + "-header")
-      .style({"padding": "20px 30px",
-              "margin-bottom": "20px",
+      .style({"padding": t.headerPadding,
+              "margin-bottom": t.headerMarginBottom + "px",
               "border": "2px solid " + t.borderColor
              })
     .each(function() {
       // "this" is redefined as current selection el;
       d3.select(this).append("span")
         .attr("id", container + "-title")
-        .style({"font-size": "24px",
+        .style({"font-size": t.titleFontSize + "px",
                 "color": t.borderColor
                })
         .html(t.title);
       d3.select(this).append("span")
         .attr("id", container + "-subtitle")
-        .style({"font-size": "18px"})
+        .style({"font-size": t.subtitleFontSize + "px"})
         .html("&nbsp;&nbsp;" + t.subtitle);
     });
 };
@@ -197,7 +223,7 @@ d3.tl.Timeline.prototype.addTimelineDiv = function (container) {
             "  shape-rendering: crispEdges; /* SVG attribute */}" +
             ".timeAxisGrp text {" +
             "  font-family: sans-serif;" +
-            "  font-size: 13px;" +
+            "  font-size: " + t.timeAxisFontSize + "px;" +
             "  text-rendering: optimizeLegibility; /* SVG attribute */}" +
             ".historytimeline .hidden {" +
             "  display: none; }" +
@@ -217,6 +243,16 @@ d3.tl.Timeline.prototype.addTimelineDiv = function (container) {
   } else {
     console.log("Already have globalTimelineStyles");
   };
+  // If the timeline is scaled, it needs a separate css style for time axis
+  // font size;
+  if (this.scale !== 1) {
+    d3.select("body").append("style")
+      .attr("class", "customTimeAxisStyle")
+      .text("#" + container + "-timeline .timeAxisGrp text {" +
+            "  font-family: sans-serif;" +
+            "  font-size: " + t.timeAxisFontSize + "px;" +
+            "  text-rendering: optimizeLegibility; /* SVG attribute */}");
+  };
 };
 
 d3.tl.Timeline.prototype.addFooterDiv = function (container) {
@@ -225,11 +261,17 @@ d3.tl.Timeline.prototype.addFooterDiv = function (container) {
   } else {
     if (this.containerID !== container) { console.log("Wrong container!"); };
   };
+  var t = this;
   d3.select("#" + container)
       .style(this.containerStyles)
     .append("div")
       .attr("id", container + "-footer")
-      .style(this.footerStyles())
+      .style({"padding": t.footerPadding,
+              "margin-top": t.footerMarginTop + "px",
+              "border": "2px solid " + this.borderColor,
+              "font-size": t.footerFontSize + "px"}
+      
+      )
       .html(this.footerHTML);
 };
 
@@ -541,6 +583,7 @@ d3.tl.Timeline.prototype.drawEvents = function () {
 
 /* ======================================================================= */
 d3.tl.Timeline.prototype.setup = function (container) {
+  if (this.scale !== 1) { this.scaleTimeline(this.scale); }
   // adds to DOM inside container;
   this.addHeaderDiv(container);
   this.addTimelineDiv(container);
