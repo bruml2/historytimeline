@@ -27,6 +27,7 @@ d3.tl.Timeline = function (kind) {
   this.eraTopMargin = 30;
   this.eraHeight = 300;
   this.timeAxisHeight = 50;
+  this.timeAxisTopMargin = 15;
   this.svgHeight = this.eraTopMargin + this.eraHeight + this.timeAxisHeight;  // 380
   this.svgWidth = 1200;
   if (kind === "eraUI") { this.svgWidth = 500;};
@@ -42,10 +43,10 @@ d3.tl.Timeline = function (kind) {
   this.footerTextBuffer = null;
   
   this.erasArr = [ new d3.tl.Era() ];
-  this.eraLabelsFontSize = "16px";
+  this.eraLabelsFontSize = 16;
   this.eraLabelsFontFamily = "Palatino, Times, \"Times New Roman\", Georgia, serif";
   this.eraLabelTopMargin = 10;
-  this.eraDateFontSize = "16px";
+  this.eraDateFontSize = 16;
 
   this.containerStyles = {
     "width": (this.svgWidth + 4) + "px",
@@ -112,6 +113,28 @@ d3.tl.Timeline.prototype.loadTimeline = function (tlObj) {
     console.log("Found eventsArr");
     this.hasEvents = true;
   }
+};
+
+d3.tl.Timeline.prototype.scaleTimeline = function (scaleBy) {
+  // the default width is 1200px; scaleBy arg (0.1 to n);
+  t = this;
+  var scaleable = [
+    "eraTopMargin",
+    "eraHeight",
+    "timeAxisHeight",
+    "timeAxisTopMargin",
+    "svgWidth",
+    "svgSideMargin",
+    "eraLabelTopMargin",
+    "eraLabelsFontSize",
+    "eraDateFontSize"
+  ];
+  scaleable.forEach(function (prop) {
+    console.log("for ", prop, t[prop], t[prop] * scaleBy);
+    t[prop] = t[prop] * scaleBy;
+  });
+
+  this.svgHeight = this.eraTopMargin + this.eraHeight + this.timeAxisHeight;
 };
 
 /* =============  Timeline setup methods ====================== */
@@ -236,7 +259,8 @@ d3.tl.Timeline.prototype.drawTimeAxis = function () {
       .attr("class", "timeAxisGrp")
       // default position is at top of SVG; move to bottom;
       .attr("transform",
-            "translate(0, " + (this.eraTopMargin + this.eraHeight + 15) + ")")
+            "translate(0, " + (this.eraTopMargin + this.eraHeight +
+                             this.timeAxisTopMargin) + ")")
       // see relevant CSS styling for path, line, and text;
       .call(timeAxis);
 };
@@ -345,11 +369,13 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
 /* ======================================================================= */
 d3.tl.Timeline.prototype.drawEraLabels = function (targetLabel) {
   var t = this;
-  // create an invisible span used to measure length of longest word;
-  var widthSpan = d3.select("body")
-      .append("span")
-      .attr("id", "overflowSpan")
-      .style("position", "absolute")
+  // create an invisible div to contain spans used to measure length of
+  // longest word;
+  d3.select("body")
+      .append("div")
+      .attr("id", "widthSpanContainer")
+      .style("font-family", t.eraLabelsFontFamily)
+      .style("font-size", t.eraLabelsFontSize + "px")
       .style("visibility", "hidden");
   function getLeftAndStoreWidthVoffset (d) {
     /* this function: returns the x-coordinate of the HTML <div> which will
@@ -366,20 +392,31 @@ d3.tl.Timeline.prototype.drawEraLabels = function (targetLabel) {
     var longestWord = 
             words.sort(function(a,b){ return b.length - a.length })[0];
     // console.log("Longest: " + longestWord);
-    // put it in the invisible span and get width;
-    widthSpan.text(longestWord);
-    var longestWordWidth =
-                      document.getElementById("overflowSpan").clientWidth;
+    // create a span to measure width of widest word;
+    var widthSpan = document.createElement('span');
+    widthSpan.setAttribute('style', 'font-family: ' + t.eraLabelsFontFamily +
+            '; font-size: ' + t.eraLabelsFontSize + 'px');
+    widthSpan.innerHTML = longestWord;
+    var cont = document.getElementById('widthSpanContainer'); 
+    cont.appendChild(widthSpan); 
+    // console.log("lastChile.offsetWidth: " + cont.lastChild.offsetWidth); 
+    // console.log("lastChile.clientWidth: " + cont.lastChild.clientWidth);
+    // NTTB: clientWidth returns 0; 
+    var longestWordWidth = cont.lastChild.offsetWidth;
     // console.log("Width of " + longestWord + ": " + longestWordWidth);
     var widthOfEra = t.timeScale(d.stop) - t.timeScale(d.start);
-    // console.log("Width of " + d.label + ": " + widthOfEra);
+    // console.log("Width of " + d.label + " era: " + widthOfEra);
     if (widthOfEra > longestWordWidth) {
       d.width = widthOfEra;
+      // console.log("Fits; returning: " + t.timeScale(d.start) + "px");
       return t.timeScale(d.start) + "px";
     } else {
+      // console.log("Does NOT fit:");
       d.width = longestWordWidth + 2;
-      var offsetLeft = t.timeScale(d.start) - ((d.width - t.widthOfEra) / 2);
-      // console.log("Offset left: " + offsetLeft);
+      // console.log("Normal: " + t.timeScale(d.start));
+      // console.log("  minus: " + ((d.width - widthOfEra) / 2));
+      var offsetLeft = t.timeScale(d.start) - ((d.width - widthOfEra) / 2);
+      // console.log("  Offset left: " + offsetLeft);
       return offsetLeft + "px";
     }
   } // end of getLeftAndStoreWidthVoffset();
@@ -420,7 +457,7 @@ d3.tl.Timeline.prototype.drawEraLabels = function (targetLabel) {
   this.D3eraLabelsGrp = d3.select("#" + this.containerID + "-timeline .eraLabelsGrp");
 
   // finished with span!
-  widthSpan.remove();
+  // d3.select("#spanToMeasureWidth").remove();
 };
 
 /* ======================================================================= */
