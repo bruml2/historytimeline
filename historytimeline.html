@@ -20,7 +20,9 @@ body {
   <h1>History Timeline Examples</h1>
   <div id="overviewAContainer" class="tlContainer"></div>
   <div id="overviewBContainer" class="tlContainer"></div>
+  <div id="overviewCContainer" class="tlContainer"></div>
   <div id="ideasBasicContainer" class="tlContainer"></div>
+  <div id="widthSpanContainer" class="widthSpanContainer"></div>
   
   <script src="js/d3.v3.4.11.min.js"></script>
   <script src="js/historytimeline.js"></script>
@@ -36,11 +38,22 @@ body {
     d3.tl.overviewB.loadTimeline(d3.tl.overviewTL);
     d3.tl.harvardStyle = {
       "borderColor": "#A41034",
-      "footerHTML": "<span class=\"drawnBy\">In consultation with Lars Kotthoff.</span>"
+      "footerHTML": "<span class=\"drawnBy\">This is the canonical version of the Overview Timeline.  To see the exact dates of an era and descriptions of its precipitating events, hover over it.</span>"
     };
     d3.tl.overviewB.loadTimeline(d3.tl.harvardStyle);
     d3.tl.overviewB.setup("overviewBContainer");
     d3.tl.overviewB.draw();
+    // =================
+    d3.tl.overviewC = new d3.tl.Timeline();
+    d3.tl.overviewC.loadTimeline(d3.tl.overviewTL);
+    d3.tl.harvardStyle = {
+      "borderColor": "#A41034",
+      "footerHTML": "<span class=\"drawnBy\">This is the canonical version of the Overview Timeline.  To see the exact dates of an era and descriptions of its precipitating events, hover over it.</span>"
+    };
+    d3.tl.overviewC.loadTimeline(d3.tl.harvardStyle);
+    d3.tl.overviewC.scaleTimeline(0.5);
+    d3.tl.overviewC.setup("overviewCContainer");
+    d3.tl.overviewC.draw();
     // =================
     d3.tl.ideasBasic = new d3.tl.Timeline();
     d3.tl.ideasBasic.loadTimeline(d3.tl.ideasBasicTL);
