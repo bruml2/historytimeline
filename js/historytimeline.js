@@ -503,8 +503,8 @@ d3.tl.Timeline.prototype.drawEraLabels = function (targetLabel) {
   // grab the group itself for later delete;
   this.D3eraLabelsGrp = d3.select("#" + this.containerID + "-timeline .eraLabelsGrp");
 
-  // finished with span!
-  // d3.select("#spanToMeasureWidth").remove();
+  // finished with widthSpanContainer!
+  d3.select("#widthSpanContainer").remove();
 };
 
 /* ======================================================================= */
