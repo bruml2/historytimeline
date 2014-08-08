@@ -63,11 +63,13 @@ d3.tl.Timeline = function (kind) {
   this.eraLabelTopMargin = 10;
   this.eraDateFontSize = 16;
 
-  this.containerStyles = {
-    "width": (this.svgWidth + 4) + "px",
-    "position": "relative",
-    "font-family": "Palatino, Times, \"Times New Roman\", Georgia, serif",
-    "background-color": "white"
+  this.containerStyles = function () {
+    return {
+      "width": (this.svgWidth + 4) + "px",
+      "position": "relative",
+      "font-family": "Palatino, Times, \"Times New Roman\", Georgia, serif",
+      "background-color": "white"
+    };
   };
   
   this.footerHTML = "<span class=\"drawnBy\">Drawn by historytimeline.js. " +
@@ -169,7 +171,7 @@ d3.tl.Timeline.prototype.addHeaderDiv = function (container) {
   var t = this;
   console.log("HMB: " + t.headerMarginBottom);
   d3.select("#" + container)
-      .style(t.containerStyles)
+      .style(t.containerStyles())
     .append("div")
       .attr("id", container + "-header")
       .style({"padding": t.headerPadding,
