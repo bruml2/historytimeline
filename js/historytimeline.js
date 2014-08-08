@@ -36,6 +36,8 @@ d3.tl.Timeline = function (kind) {
   this.svgSideMargin = 25;
   this.borderColor = "#A41034"; // Harvard Crimson;
   this.backgroundColor = "bisque";
+  this.containerFontFamily = "Palatino, Times, \"Times New Roman\", Georgia, serif";
+  this.containerBackgroundColor = "white";
   this.titleFontSize = 24;
   this.subtitleFontSize = 18;
   this.headerPaddingTop = 20;
@@ -65,10 +67,10 @@ d3.tl.Timeline = function (kind) {
 
   this.containerStyles = function () {
     return {
-      "width": (this.svgWidth + 4) + "px",
       "position": "relative",
-      "font-family": "Palatino, Times, \"Times New Roman\", Georgia, serif",
-      "background-color": "white"
+      "width": (this.svgWidth + 4) + "px",
+      "font-family": this.containerFontFamily,
+      "background-color": this.containerBackgroundColor
     };
   };
   
@@ -77,6 +79,7 @@ d3.tl.Timeline = function (kind) {
                     "and code</a>)</span>";
 
   // can be turned off or on;
+  this.hasHeader = true;
   this.hasFooter = true;
   this.hasEraDatesOnHover = true;
   this.hasPrecipEventsOnHover = false;
@@ -114,17 +117,18 @@ d3.tl.Timeline.prototype.loadTimeline = function (tlObj) {
   }
   // check for features;
   if (this.precipEventsObj) {
-    console.log("Found precipEventsObj");
+    // console.log("Found precipEventsObj");
     this.hasPrecipEventsOnHover = true;
   }
   if (this.footerTextObj) {
-    console.log("Found footerTextObj");
+    // console.log("Found footerTextObj");
     this.hasFooterTextOnHover = true;
   }
   if (this.eventsArr) {
-    console.log("Found eventsArr");
+    // console.log("Found eventsArr");
     this.hasEvents = true;
   }
+  console.log("Loaded . . .");
 };
 
 /* =============  Timeline setup methods ====================== */
@@ -154,7 +158,7 @@ d3.tl.Timeline.prototype.scaleTimeline = function (scaleBy) {
     "eraDateFontSize"
   ];
   scaleable.forEach(function (prop) {
-    console.log("for ", prop, t[prop], t[prop] * scaleBy);
+    // console.log("for ", prop, t[prop], t[prop] * scaleBy);
     t[prop] = t[prop] * scaleBy;
   });
 
@@ -165,15 +169,24 @@ d3.tl.Timeline.prototype.scaleTimeline = function (scaleBy) {
                        this.footerPaddingSides + "px";
 };
 
-d3.tl.Timeline.prototype.addHeaderDiv = function (container) {
+d3.tl.Timeline.prototype.styleContainer = function (container) {
+  console.log("=== starting " + container + " ===");
   this.containerID = container;
+  d3.select("#" + container)
+      .style({
+        "position": "relative",
+        "width": (this.svgWidth + 4) + "px",
+        "font-family": this.containerFontFamily,
+        "background-color": this.containerBackgroundColor
+      });
+};
+
+d3.tl.Timeline.prototype.addHeaderDiv = function () {
   // "this" is set to current selection el in .each loop below;
   var t = this;
-  console.log("HMB: " + t.headerMarginBottom);
-  d3.select("#" + container)
-      .style(t.containerStyles())
+  d3.select("#" + t.containerID)
     .append("div")
-      .attr("id", container + "-header")
+      .attr("id", t.containerID + "-header")
       .style({"padding": t.headerPadding,
               "margin-bottom": t.headerMarginBottom + "px",
               "border": "2px solid " + t.borderColor
@@ -181,30 +194,25 @@ d3.tl.Timeline.prototype.addHeaderDiv = function (container) {
     .each(function() {
       // "this" is redefined as current selection el;
       d3.select(this).append("span")
-        .attr("id", container + "-title")
+        .attr("id", t.containerID + "-title")
         .style({"font-size": t.titleFontSize + "px",
                 "color": t.borderColor
                })
         .html(t.title);
       d3.select(this).append("span")
-        .attr("id", container + "-subtitle")
+        .attr("id", t.containerID + "-subtitle")
         .style({"font-size": t.subtitleFontSize + "px"})
         .html("&nbsp;&nbsp;" + t.subtitle);
     });
 };
 
-d3.tl.Timeline.prototype.addTimelineDiv = function (container) {
-  if (this.containerID === null) {
-    this.containerID = container;
-  } else {
-    if (this.containerID !== container) { console.log("Wrong container!"); };
-  };
+d3.tl.Timeline.prototype.addTimelineDiv = function () {
   // grab TimelineObj because "this" is set to current selection el below;
   var t = this;
-  d3.select("#" + container)
+  d3.select("#" + t.containerID)
       .style(t.containerStyles)
     .append("div")
-      .attr("id", container + "-timeline")
+      .attr("id", t.containerID + "-timeline")
       .attr("class", "historytimeline")
       .style({"position": "relative"})
       // "this" is redefined as current selection el;
@@ -213,8 +221,8 @@ d3.tl.Timeline.prototype.addTimelineDiv = function (container) {
               "height": t.svgHeight,
               "border": "2px solid " + t.borderColor,
               "background-color": t.backgroundColor});
-  this.D3timeline = d3.select("#" + container + "-timeline");
-  this.D3svg = d3.select("#" + container + "-timeline svg");            
+  this.D3timeline = d3.select("#" + t.containerID + "-timeline");
+  this.D3svg = d3.select("#" + t.containerID + "-timeline svg");            
   // add the styles once for all timelines on the page;
   if (document.getElementById("globalTimelineStyles") === null) {
     d3.select("body").append("style")
@@ -250,24 +258,19 @@ d3.tl.Timeline.prototype.addTimelineDiv = function (container) {
   if (this.scale !== 1) {
     d3.select("body").append("style")
       .attr("class", "customTimeAxisStyle")
-      .text("#" + container + "-timeline .timeAxisGrp text {" +
+      .text("#" + t.containerID + "-timeline .timeAxisGrp text {" +
             "  font-family: sans-serif;" +
             "  font-size: " + t.timeAxisFontSize + "px;" +
             "  text-rendering: optimizeLegibility; /* SVG attribute */}");
   };
 };
 
-d3.tl.Timeline.prototype.addFooterDiv = function (container) {
-  if (this.containerID === null) {
-    this.containerID = container;
-  } else {
-    if (this.containerID !== container) { console.log("Wrong container!"); };
-  };
+d3.tl.Timeline.prototype.addFooterDiv = function () {
   var t = this;
-  d3.select("#" + container)
+  d3.select("#" + t.containerID)
       .style(this.containerStyles)
     .append("div")
-      .attr("id", container + "-footer")
+      .attr("id", t.containerID + "-footer")
       .style({"padding": t.footerPadding,
               "margin-top": t.footerMarginTop + "px",
               "border": "2px solid " + this.borderColor,
@@ -587,9 +590,10 @@ d3.tl.Timeline.prototype.drawEvents = function () {
 d3.tl.Timeline.prototype.setup = function (container) {
   if (this.scale !== 1) { this.scaleTimeline(this.scale); }
   // adds to DOM inside container;
-  this.addHeaderDiv(container);
-  this.addTimelineDiv(container);
-  if (this.hasFooter) { this.addFooterDiv(container); };
+  this.styleContainer(container)
+  if (this.hasHeader) { this.addHeaderDiv(); };
+  this.addTimelineDiv();
+  if (this.hasFooter) { this.addFooterDiv(); };
 };
 
 /* ======================================================================= */
