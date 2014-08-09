@@ -58,6 +58,10 @@ d3.tl.Timeline = function (kind) {
   this.timeScale = null;
   this.containerID = null;
   this.footerTextBuffer = null;
+  // htlQuizzer runtime values:
+  this.remainingLabels = null;
+  this.origErasArr = null;
+  this.quizTargetEra = null;
   
   this.erasArr = [ new d3.tl.Era() ];
   this.eraLabelsFontSize = 16;
@@ -341,12 +345,12 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
       .style("stroke", "black")
       // show the two dates and the precipEventsPanel;
       .on("mouseover", function(){
-        // console.log("mouseover: " + this.__data__.label);
+        // console.log("this: ", this);
+        // console.log("mouseover: ", this.__data__.label);
         if (t.hasEraDatesOnHover && !t.showingAll) {
           // on mouseover of era, select the two start/stop dates whose class
           // is the era's id (the dates are text els) and make them visible;
-          var selectorStr = "#" + t.containerID + "-timeline .eraDateGrp ." +
-                            d3.select(this).attr("id");
+          var selectorStr = "#" + t.containerID + "-timeline .eraDateGrp ." + d3.select(this).attr("id");
           // console.log(selectorStr);
           d3.selectAll(selectorStr).classed("hidden", false);
         };
@@ -379,7 +383,7 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
       // hide the two dates and the precipEventsPanel;
       .on("mouseout", function(){
         // console.log("mouseout:  " + this.__data__.label);
-        if (!t.showingDates && !t.showingAll) {
+        if (!t.showingDates && !t.showingAll && t.hasEraDatesOnHover) {
           var classSelector = ".eraDateGrp ." + d3.select(this).attr("id");
           d3.selectAll(classSelector).classed("hidden", true);
         }
@@ -475,8 +479,9 @@ d3.tl.Timeline.prototype.drawEraLabels = function (targetLabel) {
       .enter()
       // one div for each object in the array;
     .append("div")
+       // used to hide a single label for quizzes;
       .attr("id", function(d){
-                          return d.label.replace(/\W/g, "") + "Label" })
+        return t.containerID + "-" + d.label.replace(/\W/g, "") + "Label" })
       .attr("class", "eraLabel")
       .style("position", "absolute")
       .style("z-index", "1")
@@ -617,6 +622,53 @@ d3.tl.Timeline.prototype.draw = function (targetEra) {
 };
 
 /* ======================================================================= */
+d3.tl.Timeline.prototype.initQuiz = function (difficulty) {
+  // creates array of labels; stores orig value of erasArr;
+  this.hasEraDatesOnHover = false;
+  this.hasPrecipEventsOnHover = false;
+  this.hasFooterTextOnHover = false;
+  this.remainingLabels = [];
+  this.origErasArr = [];
+  // second arg sets value of this within callback (else undefined!);
+  this.erasArr.forEach(function (era) {
+    this.remainingLabels.push(era.label);
+    this.origErasArr.push(era);
+  }, this);
+};
+
+/* ======================================================================= */
+d3.tl.Timeline.prototype.nextQuizItem = function () {
+  // get next left-to-right label; clone erasArr;
+  var targetLabel = this.remainingLabels.shift();
+  /* this is a hard way to hide label; easier is to hide with CSS!
+  this.erasArr = this.origErasArr.map(function (era) {
+    if (era.label === targetLabel) {
+      this.quizTargetEra = {}; 
+      for (prop in era) {
+        if (era.hasOwnProperty(prop)) {
+          this.quizTargetEra[prop] = era[prop];
+        }
+      }
+      era.label = "";
+    }
+    return era;
+  }, this);
+  console.log("cloneArr: ", cloneArr);
+  console.log("targetEra: ", this.quizTargetEra);
+  */
+  // hide targetLabel with CSS:
+  var targetLabelEl = d3.select("#" + this.containerID + "-" +
+         targetLabel.replace(/\W/g, "") + "Label");
+  // targetLabelEl.classed("hidden", true);
+  // targetLabelEl.text("foo");
+  targetLabelEl.style("color", "transparent");
+  targetLabelEl.append("input")
+    .attr("type", "text");
+  
+};
+
+/* ======================================================================= */
+// this function is not currently used (or tested);
 d3.tl.Timeline.prototype.removeTimelineContents = function () {
   // delete contents of svg;
   var svg = document.querySelector("#" + this.containerID + "-timeline svg");
