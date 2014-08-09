@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<!-- this is htlQuizzer.html begun August 8, 2014 -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>History Timeline Quizzer</title>
+  <style>
+body {
+  background-color: wheat;
+  font-family: Palatino, serif;
+}
+main {
+  position: relative;
+  /*
+  */
+}
+.tlContainer {
+  padding: 20px 10px;
+  border: 2px solid green;
+  margin-bottom: 20px;
+}
+  </style>
+</head>
+<body>
+  
+<header>
+  <h1>History Timeline Quizzer</h1>
+  
+</header>
+<main>
+  <div id="quizContainer" class="tlContainer"></div>
+  <div id="overviewContainer" class="tlContainer"></div>
+</main>
+<footer>
+  <p>This is version 0.1.</p>
+</footer>
+  <script src="../js/d3.v3.4.11.min.js"></script>
+  <script src="../js/historytimeline.js"></script>
+  <script src="../tl/overviewTL.js"></script>
+  <script>
+// =================
+d3.tl.quiz = new d3.tl.Timeline();
+d3.tl.quiz.loadTimeline(d3.tl.overviewTL);
+d3.tl.quizStyle = {
+  "borderColor": "#A41034",
+  "footerHTML": "<span class=\"drawnBy\">This is the easy quiz.</span>"
+};
+d3.tl.quiz.loadTimeline(d3.tl.quizStyle);
+d3.tl.quiz.setup("quizContainer");
+d3.tl.quiz.draw();
+d3.tl.quiz.initQuiz("easy");
+d3.tl.quiz.nextQuizItem();
+
+// =================
+d3.tl.overview = new d3.tl.Timeline();
+d3.tl.overview.loadTimeline(d3.tl.overviewTL);
+d3.tl.harvardStyle = {
+  "borderColor": "#A41034",
+  "footerHTML": "<span class=\"drawnBy\">This is the canonical version of the Overview Timeline.  To see the exact dates of an era and descriptions of its precipitating events, hover over it.</span>"
+};
+d3.tl.overview.loadTimeline(d3.tl.harvardStyle);
+d3.tl.overview.setup("overviewContainer");
+d3.tl.overview.draw();
+// =================
+  </script>
+</body>
+</html>
