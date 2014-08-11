@@ -60,6 +60,9 @@ d3.tl.Timeline = function (kind) {
   this.containerID = null;
   this.footerTextBuffer = null;
   // htlQuizzer runtime values:
+  this.quizCorrect = null;
+  this.quizIncorrect = null;
+  this.quizFudges = null;
   this.remainingLabels = null;
   // this.origErasArr = null;
   this.quizTargetEra = null;
@@ -331,7 +334,8 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
       // one rect for each object in the array; "this" is the rect;
     .append("rect")
       // the id is the label, e.g., "UnitedKingdom" (alphanum only);
-      .attr("id", function(d){ return d.label.replace(/\W/g, "") })
+      .attr("id", function(d){ return t.containerID + "-" +
+                                      d.label.replace(/\W/g, "") + "Era" })
       .attr("class", "era")
       .attr("x", function(d){ return t.timeScale(d.start) })
       .attr("y", function(d){ return t.eraTopMargin + (d.topY * t.eraHeight) })
@@ -628,6 +632,9 @@ d3.tl.Timeline.prototype.initQuiz = function (difficulty) {
   this.hasEraDatesOnHover = false;
   this.hasPrecipEventsOnHover = false;
   this.hasFooterTextOnHover = false;
+  this.quizCorrect = 0;
+  this.quizIncorrect = 0;
+  this.quizFudges = 0;
   this.remainingLabels = [];
   // second arg sets value of this within callback (else undefined!);
   this.erasArr.forEach(function (era) {
@@ -640,12 +647,13 @@ d3.tl.Timeline.prototype.initQuiz = function (difficulty) {
 /* ======================================================================= */
 d3.tl.Timeline.prototype.nextQuizItem = function () {
   var targetLabel = this.remainingLabels.shift();
-  this.targetEraEl = null;
   // hide targetLabel with CSS:
   var targetLabelD3 = d3.select("#" + this.containerID + "-" +
          targetLabel.replace(/\W/g, "") + "Label");
   targetLabelD3.style("color", "transparent");
   // add red star to era: SVG drawing!
+  this.targetEraD3 = d3.select("#" + this.containerID + "-" +
+         targetLabel.replace(/\W/g, "") + "Era");
 
   var t = this;
   // add quizPanel to DOM;
@@ -680,18 +688,42 @@ d3.tl.Timeline.prototype.nextQuizItem = function () {
         .on("input", function (ev) {
           // console.log("input event:");
           // console.dir(this.value);
-          if (this.value === targetLabel) {
+          if (this.value === targetLabel ||
+              t.answerIsCloseEnough(targetLabel, this.value)) {
             // add tilted green "YES" for one second;
+            t.quizCorrect++;
+            console.log("correct: " + t.quizCorrect);
             d3.select("#quizPanel").remove();
             // color is currently hard-coded black;
             targetLabelD3.style("color", "black");
-            t.nextQuizItem();
+            if (t.remainingLabels.length > 7) {  // production: 0;
+              t.nextQuizItem();
+            } else {
+              t.scoreQuiz();
+            }
           }
           if (/* return without correct value */ false) {
           }
         })
         // set focus!
     });
+};
+
+/* ======================================================================= */
+d3.tl.Timeline.prototype.answerIsCloseEnough = function (label, answer) {
+  var labelToAnswerMap = {
+    "Judges": ["the judges", "jugdes"],
+    "United Kingdom": ["united monarchy", "unitedkingdom", "unitedmonarchy"]
+  };
+  // ignore case:
+  var lcAnswer = answer.toLowerCase();
+  var lcLabel = label.toLowerCase();
+  if (lcAnswer === lcLabel) { return true; };
+  return false;
+};
+
+/* ======================================================================= */
+d3.tl.Timeline.prototype.scoreQuiz = function () {
 };
 
 /* ======================================================================= */
