@@ -3,7 +3,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>History Timeline Quizzer</title>
+  <title>htlQuizzer</title>
   <style>
 body {
   background-color: wheat;
@@ -25,12 +25,13 @@ main {
   
 <header>
   <h1>History Timeline Quizzer</h1>
-  
 </header>
+
 <main>
   <div id="quizContainer" class="tlContainer"></div>
   <div id="overviewContainer" class="tlContainer"></div>
 </main>
+
 <footer>
   <p>This is version 0.1.</p>
 </footer>
@@ -49,7 +50,6 @@ d3.tl.quiz.loadTimeline(d3.tl.quizStyle);
 d3.tl.quiz.setup("quizContainer");
 d3.tl.quiz.draw();
 d3.tl.quiz.initQuiz("easy");
-d3.tl.quiz.nextQuizItem();
 
 // =================
 d3.tl.overview = new d3.tl.Timeline();
