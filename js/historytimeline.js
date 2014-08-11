@@ -1,4 +1,5 @@
 /* this is historytimeline.js - July 27, 2014 */
+"use strict"
 
 d3.tl = {};
 
@@ -60,7 +61,7 @@ d3.tl.Timeline = function (kind) {
   this.footerTextBuffer = null;
   // htlQuizzer runtime values:
   this.remainingLabels = null;
-  this.origErasArr = null;
+  // this.origErasArr = null;
   this.quizTargetEra = null;
   
   this.erasArr = [ new d3.tl.Era() ];
@@ -628,43 +629,69 @@ d3.tl.Timeline.prototype.initQuiz = function (difficulty) {
   this.hasPrecipEventsOnHover = false;
   this.hasFooterTextOnHover = false;
   this.remainingLabels = [];
-  this.origErasArr = [];
   // second arg sets value of this within callback (else undefined!);
   this.erasArr.forEach(function (era) {
     this.remainingLabels.push(era.label);
-    this.origErasArr.push(era);
   }, this);
+  
+  this.nextQuizItem();    
 };
-
+ 
 /* ======================================================================= */
 d3.tl.Timeline.prototype.nextQuizItem = function () {
-  // get next left-to-right label; clone erasArr;
   var targetLabel = this.remainingLabels.shift();
-  /* this is a hard way to hide label; easier is to hide with CSS!
-  this.erasArr = this.origErasArr.map(function (era) {
-    if (era.label === targetLabel) {
-      this.quizTargetEra = {}; 
-      for (prop in era) {
-        if (era.hasOwnProperty(prop)) {
-          this.quizTargetEra[prop] = era[prop];
-        }
-      }
-      era.label = "";
-    }
-    return era;
-  }, this);
-  console.log("cloneArr: ", cloneArr);
-  console.log("targetEra: ", this.quizTargetEra);
-  */
+  this.targetEraEl = null;
   // hide targetLabel with CSS:
-  var targetLabelEl = d3.select("#" + this.containerID + "-" +
+  var targetLabelD3 = d3.select("#" + this.containerID + "-" +
          targetLabel.replace(/\W/g, "") + "Label");
-  // targetLabelEl.classed("hidden", true);
-  // targetLabelEl.text("foo");
-  targetLabelEl.style("color", "transparent");
-  targetLabelEl.append("input")
-    .attr("type", "text");
-  
+  targetLabelD3.style("color", "transparent");
+  // add red star to era: SVG drawing!
+
+  var t = this;
+  // add quizPanel to DOM;
+  d3.select("#" + this.containerID).append("div")
+    .attr("id", "quizPanel")
+    .style({"position": "absolute",
+            "left": "400px",
+            "top": "10px",
+            "padding": "20px 40px",
+            // z-index?
+            "text-align": "center",
+            "border": "4px solid red",
+            "border-radius": "8px",
+            "background-color": "aliceblue"
+          })
+    .each(function() {
+      // "this" is redefined as current selection el;
+      d3.select(this).append("p")
+        .style({"margin-top": "0",
+                "margin-bottom": "0.5em"
+               })
+        .html("What is the name of the era with the <span style=\"color: red;\">red</span> star?");
+      d3.select(this).append("input")
+        .attr("type", "text")  // default;
+        .attr("id", "quizTextbox")
+        .attr("placeholder", "type answer here")
+        .attr("size", "20")
+        .style({"padding-left": "0.3em",
+                "font-size": "36px"})
+        // missing quizTextbox:focus CSS:
+        // border: 5px solid red; border-radius: 10px;
+        .on("input", function (ev) {
+          // console.log("input event:");
+          // console.dir(this.value);
+          if (this.value === targetLabel) {
+            // add tilted green "YES" for one second;
+            d3.select("#quizPanel").remove();
+            // color is currently hard-coded black;
+            targetLabelD3.style("color", "black");
+            t.nextQuizItem();
+          }
+          if (/* return without correct value */ false) {
+          }
+        })
+        // set focus!
+    });
 };
 
 /* ======================================================================= */
