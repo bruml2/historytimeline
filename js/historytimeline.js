@@ -685,14 +685,14 @@ d3.tl.Timeline.prototype.nextQuizItem = function () {
                 "font-size": "36px"})
         // missing quizTextbox:focus CSS:
         // border: 5px solid red; border-radius: 10px;
-        .on("input", function (ev) {
-          // console.log("input event:");
+        .on("input", function () {
+          console.dir(d3.event);
           // console.dir(this.value);
           if (this.value === targetLabel ||
-              t.answerIsCloseEnough(targetLabel, this.value)) {
-            // add tilted green "YES" for one second;
+              t.answerIsCloseEnough(this.value, targetLabel)) {
+            // add tilted green "YES" for half second;
             t.quizCorrect++;
-            console.log("correct: " + t.quizCorrect);
+            console.log("Correct: " + t.quizCorrect);
             d3.select("#quizPanel").remove();
             // color is currently hard-coded black;
             targetLabelD3.style("color", "black");
@@ -702,23 +702,38 @@ d3.tl.Timeline.prototype.nextQuizItem = function () {
               t.scoreQuiz();
             }
           }
-          if (/* return without correct value */ false) {
+          // don't yet have the right answer;
+        })
+        .on("keypress", function () {
+          // d3.event is a Keyboard Event;
+          console.dir(d3.event.keyCode);
+          // hit return, so answer must be wrong;
+          if (d3.event.keyCode === 13) {
+            t.quizIncorrect++;
+            console.log("Incorrect: " + t.quizIncorrect);
           }
         })
+
         // set focus!
     });
 };
 
 /* ======================================================================= */
-d3.tl.Timeline.prototype.answerIsCloseEnough = function (label, answer) {
+d3.tl.Timeline.prototype.answerIsCloseEnough = function (answer, label) {
   var labelToAnswerMap = {
-    "Judges": ["the judges", "jugdes"],
+    "Judges": ["the judges", "thejudges", "jugdes"],
     "United Kingdom": ["united monarchy", "unitedkingdom", "unitedmonarchy"]
   };
   // ignore case:
   var lcAnswer = answer.toLowerCase();
   var lcLabel = label.toLowerCase();
+  console.log(label, labelToAnswerMap[label], lcAnswer, lcLabel);
   if (lcAnswer === lcLabel) { return true; };
+  if (labelToAnswerMap[label].indexOf(lcAnswer) > -1) {
+    console.log("found: " +
+            labelToAnswerMap[label][labelToAnswerMap[label].indexOf(lcAnswer)]);
+    return true;
+  }
   return false;
 };
 
