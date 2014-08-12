@@ -64,6 +64,7 @@ d3.tl.Timeline = function (kind) {
   this.quizIncorrect = null;
   this.quizFudges = null;
   this.remainingLabels = null;
+  this.targetLabel = null;
   // this.origErasArr = null;
   this.quizTargetEra = null;
   
@@ -640,25 +641,11 @@ d3.tl.Timeline.prototype.initQuiz = function (difficulty) {
   this.erasArr.forEach(function (era) {
     this.remainingLabels.push(era.label);
   }, this);
-  
-  this.nextQuizItem();    
-};
- 
-/* ======================================================================= */
-d3.tl.Timeline.prototype.nextQuizItem = function () {
-  var targetLabel = this.remainingLabels.shift();
-  // hide targetLabel with CSS:
-  var targetLabelD3 = d3.select("#" + this.containerID + "-" +
-         targetLabel.replace(/\W/g, "") + "Label");
-  targetLabelD3.style("color", "transparent");
-  // add red star to era: SVG drawing!
-  this.targetEraD3 = d3.select("#" + this.containerID + "-" +
-         targetLabel.replace(/\W/g, "") + "Era");
 
-  var t = this;
   // add quizPanel to DOM;
+  var t = this;
   d3.select("#" + this.containerID).append("div")
-    .attr("id", "quizPanel")
+    .attr("id", this.containerID + "-quizPanel")
     .style({"position": "absolute",
             "left": "400px",
             "top": "10px",
@@ -678,7 +665,7 @@ d3.tl.Timeline.prototype.nextQuizItem = function () {
         .html("What is the name of the era with the <span style=\"color: red;\">red</span> star?");
       d3.select(this).append("input")
         .attr("type", "text")  // default;
-        .attr("id", "quizTextbox")
+        .attr("id", this.containerID + "-quizTextbox")
         .attr("placeholder", "type answer here")
         .attr("size", "20")
         .style({"padding-left": "0.3em",
@@ -686,16 +673,34 @@ d3.tl.Timeline.prototype.nextQuizItem = function () {
         // missing quizTextbox:focus CSS:
         // border: 5px solid red; border-radius: 10px;
         .on("input", function () {
-          console.dir(d3.event);
-          // console.dir(this.value);
-          if (this.value === targetLabel ||
-              t.answerIsCloseEnough(this.value, targetLabel)) {
-            // add tilted green "YES" for half second;
+          var textboxEl = this;
+          if (this.value === t.targetLabel ||
+              t.answerIsCloseEnough(this.value, t.targetLabel)) {
+            // add tilted green "YES" for two seconds;
+            d3.select("#" + t.containerID + "-quizPanel").append("span")
+              .attr("class", "quizPanelYES")
+              .style({"position": "absolute",
+                      "left": "100px",
+                      "top": "30px",
+                      "font-size": "72px",
+                      "font-weight": "bold",
+                      "color": "green"
+                      // rotate -30deg;
+                     })
+              .html("YES");
+            // after two seconds, remove YES and empty textbox;
+            setTimeout(function () {
+              textboxEl.value = "";
+              d3.select("#" + t.containerID +
+                              "-quizPanel .quizPanelYES").remove();
+            }, 2000);
             t.quizCorrect++;
             console.log("Correct: " + t.quizCorrect);
-            d3.select("#quizPanel").remove();
             // color is currently hard-coded black;
+            var targetLabelD3 = d3.select("#" + t.containerID + "-" +
+                                  t.targetLabel.replace(/\W/g, "") + "Label");
             targetLabelD3.style("color", "black");
+            
             if (t.remainingLabels.length > 7) {  // production: 0;
               t.nextQuizItem();
             } else {
@@ -711,28 +716,59 @@ d3.tl.Timeline.prototype.nextQuizItem = function () {
           if (d3.event.keyCode === 13) {
             t.quizIncorrect++;
             console.log("Incorrect: " + t.quizIncorrect);
+            if (t.remainingLabels.length > 7) {  // production: 0;
+              t.nextQuizItem();
+            } else {
+              t.scoreQuiz();
+            }
           }
         })
+    }); // END of each;
 
-        // set focus!
-    });
+  this.nextQuizItem();    
+};
+ 
+/* ======================================================================= */
+d3.tl.Timeline.prototype.nextQuizItem = function () {
+  this.targetLabel = this.remainingLabels.shift();
+  // hide targetLabel with CSS:
+  var targetLabelD3 = d3.select("#" + this.containerID + "-" +
+         this.targetLabel.replace(/\W/g, "") + "Label");
+  targetLabelD3.style("color", "transparent");
+  // add red star to era: SVG drawing!
+  this.targetEraD3 = d3.select("#" + this.containerID + "-" +
+         this.targetLabel.replace(/\W/g, "") + "Era");
+  //set up panel from previous item;
+  // value = ""
+  // focus;
+  
+  
 };
 
 /* ======================================================================= */
 d3.tl.Timeline.prototype.answerIsCloseEnough = function (answer, label) {
   var labelToAnswerMap = {
+    // the answer is compared after conversion to lower-case;
     "Judges": ["the judges", "thejudges", "jugdes"],
-    "United Kingdom": ["united monarchy", "unitedkingdom", "unitedmonarchy"]
+    "United Kingdom": ["united monarchy", "unitedkingdom", "unitedmonarchy"],
+    "Northern Kingdom (Israel)": ["northernkingdom", "kingdom of israel"],
+    "Southern Kingdom (Judah)": ["southernkingdom", "kingdom of judah"],
+    "Exile": ["babylonia", "babylonianexile"],
+    "Persian Period": ["persian", "persianperiod"],
+    "Hellenistic Period": ["hellenistic", "hellenisticperiod", "greek"],
+    "Maccabean (Hasmonean) Rule": ["maccabean", "hasmonean", "maccabeanrule",
+      "maccabean rule", "hasmonean rule", "hasmoneanrule"],
+    "Rome: Temple": ["rome", "rometemple", "romewithtemple", "romeandtemple"]
   };
   // ignore case:
   var lcAnswer = answer.toLowerCase();
   var lcLabel = label.toLowerCase();
   console.log(label, labelToAnswerMap[label], lcAnswer, lcLabel);
-  if (lcAnswer === lcLabel) { return true; };
+  if (lcAnswer === lcLabel) { this.quizFudges++; return true; };
   if (labelToAnswerMap[label].indexOf(lcAnswer) > -1) {
     console.log("found: " +
             labelToAnswerMap[label][labelToAnswerMap[label].indexOf(lcAnswer)]);
-    return true;
+    t.quizFudges++; return true;
   }
   return false;
 };
