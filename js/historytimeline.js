@@ -710,8 +710,7 @@ d3.tl.Timeline.prototype.initQuiz = function (difficulty) {
           // don't yet have the right answer;
         })
         .on("keypress", function () {
-          // d3.event is a Keyboard Event;
-          console.dir(d3.event.keyCode);
+          // "d3.event" is a Keyboard Event;
           // hit return, so answer must be wrong;
           if (d3.event.keyCode === 13) {
             t.quizIncorrect++;
@@ -768,13 +767,51 @@ d3.tl.Timeline.prototype.answerIsCloseEnough = function (answer, label) {
   if (labelToAnswerMap[label].indexOf(lcAnswer) > -1) {
     console.log("found: " +
             labelToAnswerMap[label][labelToAnswerMap[label].indexOf(lcAnswer)]);
-    t.quizFudges++; return true;
+    this.quizFudges++; return true;
   }
   return false;
 };
 
 /* ======================================================================= */
 d3.tl.Timeline.prototype.scoreQuiz = function () {
+  var scoreHTML = "Nice job! You got all the answers.";
+  // add scorePanel to DOM;
+  var t = this;
+  d3.select("#" + this.containerID).append("div")
+    .attr("id", this.containerID + "-scorePanel")
+    .style({"position": "absolute",
+            "left": "400px",
+            "top": "10px",
+            "padding": "20px 40px",
+            // z-index?
+            "text-align": "center",
+            "border": "4px solid blue",
+            "border-radius": "8px",
+            "background-color": "aliceblue"
+          })
+    .each(function() {
+      // "this" is redefined as current selection el;
+      d3.select(this).append("p")
+        .style({"margin-top": "0",
+                "margin-bottom": "0.5em"
+               })
+        .html(scoreHTML);
+      d3.select(this).append("button")
+        .attr("type", "button")  // default is submit;
+        .attr("id", this.containerID + "-quizBtn")
+        .attr("value", "OK")
+        .style({"position": "absolute",
+                "left": "400px",
+                "top": "40px",
+                "padding": "0.3em",
+                "font-size": "20px"})
+        // missing quizTextbox:focus CSS:
+        // border: 5px solid red; border-radius: 10px;
+        .on("input", function () {
+          var textboxEl = this;
+        })
+    }); // END of each;
+  console.log("END");
 };
 
 /* ======================================================================= */
