@@ -16,7 +16,6 @@ d3.tl.Era = function (label, start, stop, bgcolor) {
   this.labelFontSize   = null;
   this.labelFontFamily = null;
   this.labelTopMargin  = null;
-  this.dateFontSize    = null;
 };
 
 /* =============  Timeline constructor ====================== */
@@ -65,7 +64,6 @@ d3.tl.Timeline = function (kind) {
   this.quizFudges = null;
   this.remainingLabels = null;
   this.targetLabel = null;
-  // this.origErasArr = null;
   this.quizTargetEra = null;
   
   this.erasArr = [ new d3.tl.Era() ];
@@ -116,7 +114,7 @@ d3.tl.Timeline = function (kind) {
 
 /* =============  Timeline load method ====================== */
 d3.tl.Timeline.prototype.loadTimeline = function (tlObj) {
-  // each property in tlObj is assigned to that property in this overriding
+  // each property in tlObj is assigned to that property in "this" overriding
   // the defaults assigned in the constructor;
   var key;
   for (key in tlObj) {
@@ -142,7 +140,7 @@ d3.tl.Timeline.prototype.loadTimeline = function (tlObj) {
 
 /* =============  Timeline setup methods ====================== */
 d3.tl.Timeline.prototype.scaleTimeline = function (scaleBy) {
-  // the default width is 1200px; scaleBy arg (0.1 to n);
+  // the default width is 1200px; scaleBy arg (0.5 to n);
   var t = this;
   t.scale = scaleBy;
   var scaleable = [
