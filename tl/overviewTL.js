@@ -3,7 +3,6 @@ d3.tl.overviewTL = {
   "dataOrigin": "overviewTL.js",
   "title": "The Biblical Narrative: Eras and Precipitating Events",
   "subtitle": "[independent support after about 800 BCE]",
-  "borderColor": "#0404B4", // Emory blue;
   "erasArr": [
     {label: "Judges", start: -1100, stop: -1020,
        topY: 0, height: 1.0, bgcolor: "#A9BCF5"},
