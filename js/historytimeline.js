@@ -349,12 +349,12 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
       .style("stroke", "black")
       // show the two dates and the precipEventsPanel;
       .on("mouseover", function(){
-        // console.log("this: ", this);
         // console.log("mouseover: ", this.__data__.label);
         if (t.hasEraDatesOnHover && !t.showingAll) {
           // on mouseover of era, select the two start/stop dates whose class
           // is the era's id (the dates are text els) and make them visible;
-          var selectorStr = "#" + t.containerID + "-timeline .eraDateGrp ." + d3.select(this).attr("id");
+          var selectorStr = "#" + t.containerID + "-timeline .eraDateGrp ." +
+            this.__data__.label.replace(/\W/g, "");
           // console.log(selectorStr);
           d3.selectAll(selectorStr).classed("hidden", false);
         };
@@ -518,6 +518,8 @@ d3.tl.Timeline.prototype.drawEraLabels = function (targetLabel) {
 
 /* ======================================================================= */
 d3.tl.Timeline.prototype.drawEraDates = function () {
+  if (!this.hasEraDatesOnHover) {
+   console.log(this.hasEraDatesOnHover + ": Skipping era dates"); return; };
   var t = this;
   // each era gets TWO hidden svg text elements; class == class-of-era;
   // mouseover an era causes the pair to appear;
