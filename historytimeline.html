@@ -6,12 +6,11 @@
   <title>History Timeline</title>
   <style>
 body {
-  background-color: yellow;
+  background-color: #D4CBC2;
   font-family: Palatino, serif;
 }
 .tlContainer {
   padding: 20px 10px;
-  border: 2px solid green;
   margin-bottom: 20px;
 }
   </style>
@@ -30,27 +29,30 @@ body {
   <script>
     d3.tl.overviewA = new d3.tl.Timeline();
     d3.tl.overviewA.loadTimeline(d3.tl.overviewTL);
+    d3.tl.harvardStyle = {
+      "footerHTML": "<span class=\"drawnBy\">This is the canonical version of the Overview Timeline.  To see the exact dates of an era and descriptions of its precipitating events, hover over it.</span>"
+    };
+    d3.tl.overviewA.loadTimeline(d3.tl.harvardStyle);
     d3.tl.overviewA.setup("overviewAContainer");
-    d3.tl.overviewA.draw("Persian Period");    
+    d3.tl.overviewA.draw();    
     // =================
     d3.tl.overviewB = new d3.tl.Timeline();
     d3.tl.overviewB.loadTimeline(d3.tl.overviewTL);
-    d3.tl.harvardStyle = {
-      "borderColor": "#A41034",
-      "footerHTML": "<span class=\"drawnBy\">This is the canonical version of the Overview Timeline.  To see the exact dates of an era and descriptions of its precipitating events, hover over it.</span>"
+    d3.tl.targetEraDemo = {
+      "borderColor": "#0404B4",  // Emory blue;
+      "footerHTML": "<span>This timeline demonstrates the \"targetEra\" feature which highlights an era by reducing the opacity of the others and the ability to override default properties (such as <i>borderColor</i>).</span>"
     };
-    d3.tl.overviewB.loadTimeline(d3.tl.harvardStyle);
+    d3.tl.overviewB.loadTimeline(d3.tl.targetEraDemo);
     d3.tl.overviewB.setup("overviewBContainer");
-    d3.tl.overviewB.draw();
+    d3.tl.overviewB.draw("Persian Period");
     // =================
     d3.tl.overviewC = new d3.tl.Timeline();
     d3.tl.overviewC.loadTimeline(d3.tl.overviewTL);
     d3.tl.harvardStyle = {
-      "borderColor": "#A41034",
-      "footerHTML": "<span class=\"drawnBy\">This is the canonical version of the Overview Timeline.  To see the exact dates of an era and descriptions of its precipitating events, hover over it.</span>"
+      "scale": 0.5,
+      "footerHTML": "<span>This timeline demonstrates the \"scale\" property (scale = 0.5).</span>"
     };
     d3.tl.overviewC.loadTimeline(d3.tl.harvardStyle);
-    d3.tl.overviewC.scale = 0.5;
     d3.tl.overviewC.setup("overviewCContainer");
     d3.tl.overviewC.draw();
     // =================
@@ -64,7 +66,7 @@ body {
     d3.tl.ideasBasic.setup("ideasBasicContainer");
     d3.tl.ideasBasic.draw();
     
-    console.log(d3.tl.overviewB);
+    console.log(d3.tl.overviewA);
   </script>
 </body>
 </html>
