@@ -388,8 +388,9 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
       .on("mouseout", function(){
         // console.log("mouseout:  " + this.__data__.label);
         if (!t.showingDates && !t.showingAll && t.hasEraDatesOnHover) {
-          var classSelector = ".eraDateGrp ." + d3.select(this).attr("id");
-          d3.selectAll(classSelector).classed("hidden", true);
+          var selectorStr = "#" + t.containerID + "-timeline .eraDateGrp ." +
+            this.__data__.label.replace(/\W/g, "");
+          d3.selectAll(selectorStr).classed("hidden", true);
         }
         if (t.hasPrecipEventsOnHover) {
           t.D3precipEventsPanel
@@ -625,6 +626,34 @@ d3.tl.Timeline.prototype.draw = function (targetEra) {
     console.log("D3eraLabelsGrp: ", this.D3eraLabelsGrp);
     console.log("D3eraDatesGrps: ", this.D3eraDatesGrps);
     }
+};
+
+/* ======================================================================= */
+// the timeline arg may be:
+//  1) the full reference to a d3.tl property resulting from including the
+//     timeline data in a <script> tag: first line of file looks like:
+//       d3.tl.overviewTL = { <the timeline data overriding defaults> };
+//  2) the URL of a file in the above format (creates d3.tl.property) (TO DO);
+//  3) a string which matches the title of a timeline in the database (TODO);
+//  4) a value which matches the tlid of a timeline in the database (TODO);
+d3.tl.Timeline.prototype.drawTimelineInContainer = function (timeline, container, overrideObj) {
+  // this one-call interface only works for a single timeline on the page;
+  d3.tl.singleTimeline  = new d3.tl.Timeline();
+  // if the timeline data is not already a d3.tl object, then do what's
+  // necessary to create it here (probably just d3.json(...));
+  d3.tl.singleTimeline.loadtimeline(timelineObj);
+  if (overrideObj) {
+    if (typeof(overrideObj) === "object") {
+      d3.tl.singleTimeline.loadtimeline(overrideObj);
+    } else {
+      // should be an array of such objects;
+      overrideObj.forEach( function (arrItem) {
+        d3.tl.singleTimeline.loadtimeline(arrItem);
+      });
+    }
+  }
+  d3.tl.singleTimeline.setup(container);
+  d3.tl.singleTimeline.draw();
 };
 
 /* ======================================================================= */
