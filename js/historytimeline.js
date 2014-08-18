@@ -4,7 +4,7 @@
 d3.tl = {};
 
 /* =============  Era constructor ====================== */
-d3.tl.Era = function (label, start, stop, bgcolor) {
+d3.tl.Era = function Era(label, start, stop, bgcolor) {
   this.label = label || "Example Label";
   this.start = start || -380;
   this.stop  = stop  || -220;
@@ -19,7 +19,7 @@ d3.tl.Era = function (label, start, stop, bgcolor) {
 };
 
 /* =============  Timeline constructor ====================== */
-d3.tl.Timeline = function (kind) {
+d3.tl.Timeline = function Timeline(kind) {
   this.tlid = null;        // local storage id assigned by Builder;
   this.dataOrigin = null;  // name of individual file containing TL;
   this.scale = 1;
@@ -30,7 +30,12 @@ d3.tl.Timeline = function (kind) {
   this.timeAxisHeight = 50;
   this.timeAxisTopMargin = 15;
   this.timeAxisFontSize = 13;
-  this.svgHeight = this.eraTopMargin + this.eraHeight + this.timeAxisHeight;  // 380
+  Object.defineProperty(this, "svgHeight",{
+    get: function() {
+      console.log("get of svgHeight"); 
+      return this.eraTopMargin + this.eraHeight + this.timeAxisHeight; 
+    }
+  });
   this.svgWidth = 1200;
   if (kind === "eraUI") { this.svgWidth = 500;};
   this.svgSideMargin = 25;
@@ -42,14 +47,22 @@ d3.tl.Timeline = function (kind) {
   this.subtitleFontSize = 18;
   this.headerPaddingTop = 20;
   this.headerPaddingSides = 30;
-  this.headerPadding = this.headerPaddingTop + "px " +
-                       this.headerPaddingSides + "px";
+  Object.defineProperty(this, "headerPadding",{
+    get: function() {
+      console.log("get of headerPadding"); 
+      return this.headerPaddingTop + "px " + this.headerPaddingSides + "px"; 
+    }
+  });
   this.headerMarginBottom = 20;
   this.footerFontSize = 12;
   this.footerPaddingTop = 10;
   this.footerPaddingSides = 15;
-  this.footerPadding = this.footerPaddingTop + "px " +
-                       this.footerPaddingSides + "px";
+  Object.defineProperty(this, "footerPadding",{
+    get: function() {
+      console.log("get of footerPadding"); 
+      return this.footerPaddingTop + "px " + this.footerPaddingSides + "px"; 
+    }
+  });
   this.footerMarginTop = 20;
   // runtime values:
   this.dataOrigin = null;
@@ -168,12 +181,6 @@ d3.tl.Timeline.prototype.scaleTimeline = function (scaleBy) {
     // console.log("for ", prop, t[prop], t[prop] * scaleBy);
     t[prop] = t[prop] * scaleBy;
   });
-
-  this.svgHeight = this.eraTopMargin + this.eraHeight + this.timeAxisHeight;
-  this.headerPadding = this.headerPaddingTop + "px " +
-                       this.headerPaddingSides + "px";
-  this.footerPadding = this.footerPaddingTop + "px " +
-                       this.footerPaddingSides + "px";
 };
 
 d3.tl.Timeline.prototype.styleContainer = function (container) {
@@ -614,7 +621,7 @@ d3.tl.Timeline.prototype.draw = function (targetEra) {
   this.drawTimeAxis();
   this.drawEras(targetEra);
   this.drawEraLabels(targetEra);
-  this.drawEraDates();
+  if (this.hasEraDatesOnHover) { this.drawEraDates(); };
   if (this.hasEvents) { this.drawEvents(); };
   
   // debug:
@@ -629,30 +636,31 @@ d3.tl.Timeline.prototype.draw = function (targetEra) {
 };
 
 /* ======================================================================= */
-// the timeline arg may be:
-//  1) the full reference to a d3.tl property resulting from including the
-//     timeline data in a <script> tag: first line of file looks like:
-//       d3.tl.overviewTL = { <the timeline data overriding defaults> };
-//  2) the URL of a file in the above format (creates d3.tl.property) (TO DO);
-//  3) a string which matches the title of a timeline in the database (TODO);
-//  4) a value which matches the tlid of a timeline in the database (TODO);
-d3.tl.Timeline.prototype.drawTimelineInContainer = function (timeline, container, overrideObj) {
-  // this one-call interface only works for a single timeline on the page;
-  d3.tl.singleTimeline  = new d3.tl.Timeline();
+d3.tl.drawTimelineInContainer = function (timelineObj, containerID, overrideObj) {
+  // the timeline arg may be:
+  //  1) the full reference to a d3.tl property resulting from including the
+  //     timeline data in a <script> tag: first line of file looks like:
+  //       d3.tl.overviewTL = { <the timeline data and default overrides> };
+  //  2) the URL of a file in the above format (creates d3.tl property) (TO DO);
+  //  3) a string which matches the title of a timeline in the database (TODO);
+  //  4) a value which matches the tlid of a timeline in the database (TODO);
+  // the containerID arg is a string: the id of the container <div>;
+  // NB: this one-call interface only works for a single timeline on the page;
+  d3.tl.singleTimeline = new d3.tl.Timeline();
   // if the timeline data is not already a d3.tl object, then do what's
   // necessary to create it here (probably just d3.json(...));
-  d3.tl.singleTimeline.loadtimeline(timelineObj);
+  d3.tl.singleTimeline.loadTimeline(timelineObj);
   if (overrideObj) {
     if (typeof(overrideObj) === "object") {
-      d3.tl.singleTimeline.loadtimeline(overrideObj);
+      d3.tl.singleTimeline.loadTimeline(overrideObj);
     } else {
       // should be an array of such objects;
       overrideObj.forEach( function (arrItem) {
-        d3.tl.singleTimeline.loadtimeline(arrItem);
+        d3.tl.singleTimeline.loadTimeline(arrItem);
       });
     }
   }
-  d3.tl.singleTimeline.setup(container);
+  d3.tl.singleTimeline.setup(containerID);
   d3.tl.singleTimeline.draw();
 };
 
