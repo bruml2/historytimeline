@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!-- this is one-callTimeline.html begun August 18, 2014 -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>One-call Timeline</title>
+  <style>
+body {
+  background-color: #D4CBC2;
+  font-family: Palatino, serif;
+}
+.tlContainer {
+  padding: 20px 10px;
+  margin-bottom: 20px;
+}
+  </style>
+</head>
+<body>
+  <h1>One-call Timeline Example</h1>
+  <div id="timelineContainer" class="tlContainer"></div>
+  
+  <script src="js/d3.v3.4.11.min.js"></script>
+  <script src="js/historytimeline.js"></script>
+  <script src="tl/overviewTL.js"></script>
+  <script>
+    // the harvardStyle object overrides a default value;
+    d3.tl.harvardStyle = {
+      "footerHTML": "<span class=\"drawnBy\">This is the canonical version of the Overview Timeline.  To see the exact dates of an era and descriptions of its precipitating events, hover over it.</span>"
+    };
+    // "d3.tl.overviewTL" is an object created by the overviewTL.js
+    // file and containing the non-default data for the timeline;
+    d3.tl.drawTimelineInContainer(d3.tl.overviewTL,
+                                  "timelineContainer",
+                                  d3.tl.harvardStyle);
+  </script>
+</body>
+</html>
