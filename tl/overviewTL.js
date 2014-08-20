@@ -8,28 +8,10 @@ d3.tl.overviewTL = {
             start: -1100, stop: -1020, bgcolor: "#A9BCF5"},
     {label: "United Kingdom",
             start: -1020, stop: -931, bgcolor: "#F5BCA9"},
-    /*
-    {label: "Judges", start: -1100, stop: -1020,
-       topY: 0, height: 1.0, bgcolor: "#A9BCF5"},
-    {label: "United Kingdom", start: -1020, stop: -931,
-       topY: 0, height: 1.0, bgcolor: "#F5BCA9"},
-    */
     {label: "Northern Kingdom (Israel)",
             start: -931, stop: -722, bgcolor: "#F5A9E1", topY: 0, height: 0.7},
     {label: "Southern Kingdom (Judah)",
             start: -931, stop: -586, bgcolor: "#F5A9BC", topY: 0.7, height: 0.3},
-    /*
-    {label: "Exile", start: -586, stop: -538,
-       topY: 0, height: 1.0, bgcolor: "#F78181"},
-    {label: "Persian Period", start: -538, stop: -332,
-       topY: 0, height: 1.0, bgcolor: "#A9BCF5"},
-    {label: "Hellenistic Period", start: -332, stop: -168,
-       topY: 0, height: 1.0, bgcolor: "#A9E2F3"},
-    {label: "Maccabean (Hasmonean) Rule", start: -168, stop: -63,
-       topY: 0, height: 1.0, bgcolor: "#F5A9E1"},
-    {label: "Rome: Temple", start: -63, stop: 70,
-       topY: 0, height: 1.0, bgcolor: "#F5BCA9"}
-    */
     {label: "Exile",
             start: -586, stop: -538, bgcolor: "#F78181"},
     {label: "Persian Period",
