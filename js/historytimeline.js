@@ -76,7 +76,7 @@ d3.tl.Timeline = function Timeline(kind) {
   this.targetLabel = null;
   this.quizTargetEra = null;
 
-  this.erasArr = [ new d3.tl.Era() ];
+  this.erasArr = null;
   this.eraLabelsFontSize = 16;
   this.eraLabelsFontFamily = "Palatino, Times, \"Times New Roman\", Georgia, serif";
   this.eraLabelTopMargin = 10;
@@ -124,6 +124,25 @@ d3.tl.Timeline = function Timeline(kind) {
 
 /* =============  Timeline load method ====================== */
 d3.tl.Timeline.prototype.loadTimeline = function(tlObj) {
+  // NB: any erasArr already on the timeline will be overwritten; therefore, if one
+  // wishes to modify the eras provided in a standard timeline, the overriding tl
+  // object must provide ALL the eras wanted (none will be preserved from the
+  // standard timeline);
+
+  // first, if the tl being loaded has an erasArr, each era is written over an
+  // instantiated era containing all possible era properties;
+  if (tlObj.erasArr) {
+    var newErasArr = tlObj.erasArr.map(function(thisEra, idx, oldEraArr) {
+      var newEra = new d3.tl.Era();
+      for (key in thisEra) {
+        if (thisEra.hasOwnProperty(key)) {
+          newEra[key] = thisEra[key];
+        }     
+      }
+      return newEra;
+    });
+    tlObj.erasArr = newErasArr;
+  }
   // each property in tlObj is assigned to that property in "this" overriding
   // the defaults assigned in the constructor;
   var key;
@@ -132,6 +151,7 @@ d3.tl.Timeline.prototype.loadTimeline = function(tlObj) {
       this[key] = tlObj[key];
     }
   }
+
   // check for features;
   if (this.precipEventsObj) {
     // console.log("Found precipEventsObj");
