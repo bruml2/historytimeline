@@ -1,5 +1,5 @@
 /* this is historytimeline.js - July 27, 2014 */
-"use strict"
+"use strict";
 
 d3.tl = {};
 
@@ -30,14 +30,13 @@ d3.tl.Timeline = function Timeline(kind) {
   this.timeAxisHeight = 50;
   this.timeAxisTopMargin = 15;
   this.timeAxisFontSize = 13;
-  Object.defineProperty(this, "svgHeight",{
+  Object.defineProperty(this, "svgHeight", {
     get: function() {
-      console.log("get of svgHeight"); 
-      return this.eraTopMargin + this.eraHeight + this.timeAxisHeight; 
+      return this.eraTopMargin + this.eraHeight + this.timeAxisHeight;
     }
   });
   this.svgWidth = 1200;
-  if (kind === "eraUI") { this.svgWidth = 500;};
+  if (kind === "eraUI") { this.svgWidth = 500;}
   this.svgSideMargin = 25;
   this.borderColor = "#A41034"; // Harvard Crimson;
   this.backgroundColor = "bisque";
@@ -47,20 +46,18 @@ d3.tl.Timeline = function Timeline(kind) {
   this.subtitleFontSize = 18;
   this.headerPaddingTop = 20;
   this.headerPaddingSides = 30;
-  Object.defineProperty(this, "headerPadding",{
+  Object.defineProperty(this, "headerPadding", {
     get: function() {
-      console.log("get of headerPadding"); 
-      return this.headerPaddingTop + "px " + this.headerPaddingSides + "px"; 
+      return this.headerPaddingTop + "px " + this.headerPaddingSides + "px";
     }
   });
   this.headerMarginBottom = 20;
   this.footerFontSize = 12;
   this.footerPaddingTop = 10;
   this.footerPaddingSides = 15;
-  Object.defineProperty(this, "footerPadding",{
+  Object.defineProperty(this, "footerPadding", {
     get: function() {
-      console.log("get of footerPadding"); 
-      return this.footerPaddingTop + "px " + this.footerPaddingSides + "px"; 
+      return this.footerPaddingTop + "px " + this.footerPaddingSides + "px";
     }
   });
   this.footerMarginTop = 20;
@@ -78,14 +75,14 @@ d3.tl.Timeline = function Timeline(kind) {
   this.remainingLabels = null;
   this.targetLabel = null;
   this.quizTargetEra = null;
-  
+
   this.erasArr = [ new d3.tl.Era() ];
   this.eraLabelsFontSize = 16;
   this.eraLabelsFontFamily = "Palatino, Times, \"Times New Roman\", Georgia, serif";
   this.eraLabelTopMargin = 10;
   this.eraDateFontSize = 16;
 
-  this.containerStyles = function () {
+  this.containerStyles = function() {
     return {
       "position": "relative",
       "width": (this.svgWidth + 4) + "px",
@@ -93,7 +90,7 @@ d3.tl.Timeline = function Timeline(kind) {
       "background-color": this.containerBackgroundColor
     };
   };
-  
+
   this.footerHTML = "<span class=\"drawnBy\">Drawn by historytimeline.js. " +
                     "(<a href=\"https://github.com/bruml2/historytimeline\">Info " +
                     "and code</a>)</span>";
@@ -126,7 +123,7 @@ d3.tl.Timeline = function Timeline(kind) {
 };
 
 /* =============  Timeline load method ====================== */
-d3.tl.Timeline.prototype.loadTimeline = function (tlObj) {
+d3.tl.Timeline.prototype.loadTimeline = function(tlObj) {
   // each property in tlObj is assigned to that property in "this" overriding
   // the defaults assigned in the constructor;
   var key;
@@ -152,7 +149,7 @@ d3.tl.Timeline.prototype.loadTimeline = function (tlObj) {
 };
 
 /* =============  Timeline setup methods ====================== */
-d3.tl.Timeline.prototype.scaleTimeline = function (scaleBy) {
+d3.tl.Timeline.prototype.scaleTimeline = function(scaleBy) {
   // the default width is 1200px; scaleBy arg (0.5 to n);
   var t = this;
   t.scale = scaleBy;
@@ -177,13 +174,13 @@ d3.tl.Timeline.prototype.scaleTimeline = function (scaleBy) {
     "eraLabelsFontSize",
     "eraDateFontSize"
   ];
-  scaleable.forEach(function (prop) {
+  scaleable.forEach(function(prop) {
     // console.log("for ", prop, t[prop], t[prop] * scaleBy);
     t[prop] = t[prop] * scaleBy;
   });
 };
 
-d3.tl.Timeline.prototype.styleContainer = function (container) {
+d3.tl.Timeline.prototype.styleContainer = function(container) {
   console.log("=== starting " + container + " ===");
   this.containerID = container;
   d3.select("#" + container)
@@ -195,7 +192,7 @@ d3.tl.Timeline.prototype.styleContainer = function (container) {
       });
 };
 
-d3.tl.Timeline.prototype.addHeaderDiv = function () {
+d3.tl.Timeline.prototype.addHeaderDiv = function() {
   // "this" is set to current selection el in .each loop below;
   var t = this;
   d3.select("#" + t.containerID)
@@ -220,7 +217,7 @@ d3.tl.Timeline.prototype.addHeaderDiv = function () {
     });
 };
 
-d3.tl.Timeline.prototype.addTimelineDiv = function () {
+d3.tl.Timeline.prototype.addTimelineDiv = function() {
   // grab TimelineObj because "this" is set to current selection el below;
   var t = this;
   d3.select("#" + t.containerID)
@@ -236,7 +233,7 @@ d3.tl.Timeline.prototype.addTimelineDiv = function () {
               "border": "2px solid " + t.borderColor,
               "background-color": t.backgroundColor});
   this.D3timeline = d3.select("#" + t.containerID + "-timeline");
-  this.D3svg = d3.select("#" + t.containerID + "-timeline svg");            
+  this.D3svg = d3.select("#" + t.containerID + "-timeline svg");
   // add the styles once for all timelines on the page;
   if (document.getElementById("globalTimelineStyles") === null) {
     d3.select("body").append("style")
@@ -251,7 +248,7 @@ d3.tl.Timeline.prototype.addTimelineDiv = function () {
             "  text-rendering: optimizeLegibility; /* SVG attribute */}" +
             ".historytimeline .hidden {" +
             "  display: none; }" +
-            ".precipEventsPanel {" +            
+            ".precipEventsPanel {" +
             "  position: absolute;" +
             "  z-index: 2;" +
             "  border: solid 1px #aaa;" +
@@ -261,12 +258,12 @@ d3.tl.Timeline.prototype.addTimelineDiv = function () {
             "  opacity: 0.000001;" +
             "  font: 15px sans-serif;" +
             "  pointer-events: none;}" +
-            ".precipEventsPanel p {" +            
+            ".precipEventsPanel p {" +
             "  margin: 0;" +
             "  padding: 6px}");
   } else {
     console.log("Already have globalTimelineStyles");
-  };
+  }
   // If the timeline is scaled, it needs a separate css style for time axis
   // font size;
   if (this.scale !== 1) {
@@ -276,10 +273,10 @@ d3.tl.Timeline.prototype.addTimelineDiv = function () {
             "  font-family: sans-serif;" +
             "  font-size: " + t.timeAxisFontSize + "px;" +
             "  text-rendering: optimizeLegibility; /* SVG attribute */}");
-  };
+  }
 };
 
-d3.tl.Timeline.prototype.addFooterDiv = function () {
+d3.tl.Timeline.prototype.addFooterDiv = function() {
   var t = this;
   d3.select("#" + t.containerID)
       .style(this.containerStyles)
@@ -288,14 +285,12 @@ d3.tl.Timeline.prototype.addFooterDiv = function () {
       .style({"padding": t.footerPadding,
               "margin-top": t.footerMarginTop + "px",
               "border": "2px solid " + this.borderColor,
-              "font-size": t.footerFontSize + "px"}
-      
-      )
+              "font-size": t.footerFontSize + "px"})
       .html(this.footerHTML);
 };
 
 /* ======================================================================= */
-d3.tl.Timeline.prototype.drawTimeAxis = function () {
+d3.tl.Timeline.prototype.drawTimeAxis = function() {
   // set up timescale for x-axis;
   // if axisStartYr and axisStopYr are not null, then use those values instead of computing from eras (e.g., empty timeline or during building;
   var minDate, maxDate;
@@ -303,8 +298,8 @@ d3.tl.Timeline.prototype.drawTimeAxis = function () {
     minDate = this.axisStartYr;
     maxDate = this.axisStopYr;
   } else {
-    minDate = d3.min(this.erasArr, function(d){ return d.start });
-    maxDate = d3.max(this.erasArr, function(d){ return d.stop });
+    minDate = d3.min(this.erasArr, function(d) { return d.start });
+    maxDate = d3.max(this.erasArr, function(d) { return d.stop });
   }
   // console.log("min/max: " + minDate + "/" + maxDate);
 
@@ -327,7 +322,7 @@ d3.tl.Timeline.prototype.drawTimeAxis = function () {
 };
 
 /* ======================================================================= */
-d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
+d3.tl.Timeline.prototype.drawEras = function(targetEraLabel) {
   // if targetEraLabel is specified, others are 50% opacity;
   // grab TimelineObj because "this" is set to current selection el below;
   var t = this;
@@ -340,22 +335,22 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
       // one rect for each object in the array; "this" is the rect;
     .append("rect")
       // the id is the label, e.g., "UnitedKingdom" (alphanum only);
-      .attr("id", function(d){ return t.containerID + "-" +
-                                      d.label.replace(/\W/g, "") + "Era" })
+      .attr("id", function(d) { return t.containerID + "-" +
+                                       d.label.replace(/\W/g, "") + "Era" })
       .attr("class", "era")
-      .attr("x", function(d){ return t.timeScale(d.start) })
-      .attr("y", function(d){ return t.eraTopMargin + (d.topY * t.eraHeight) })
+      .attr("x",  function(d) { return t.timeScale(d.start) })
+      .attr("y",  function(d) { return t.eraTopMargin + (d.topY * t.eraHeight) })
       // slightly rounded corners;
       .attr("rx", 4)
       .attr("ry", 4)
-      .attr("width", function(d){ return t.timeScale(d.stop) -
-                                         t.timeScale(d.start) })
-      .attr("height", function(d){ return d.height * t.eraHeight })
-      .style("fill", function(d){ return d.bgcolor })
+      .attr("width",  function(d) { return t.timeScale(d.stop) -
+                                           t.timeScale(d.start) })
+      .attr("height", function(d) { return d.height * t.eraHeight })
+      .style("fill",  function(d) { return d.bgcolor })
       .style("stroke-width", 1)
       .style("stroke", "black")
       // show the two dates and the precipEventsPanel;
-      .on("mouseover", function(){
+      .on("mouseover", function() {
         // console.log("mouseover: ", this.__data__.label);
         if (t.hasEraDatesOnHover && !t.showingAll) {
           // on mouseover of era, select the two start/stop dates whose class
@@ -364,7 +359,7 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
             this.__data__.label.replace(/\W/g, "");
           // console.log(selectorStr);
           d3.selectAll(selectorStr).classed("hidden", false);
-        };
+        }
         if (t.hasPrecipEventsOnHover && !t.showingAll) {
           // get position and text for the precipEventsPanel; make opaque;
           var eraObj = this.__data__;
@@ -392,7 +387,7 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
         }
       }) // end of mouseover;
       // hide the two dates and the precipEventsPanel;
-      .on("mouseout", function(){
+      .on("mouseout", function() {
         // console.log("mouseout:  " + this.__data__.label);
         if (!t.showingDates && !t.showingAll && t.hasEraDatesOnHover) {
           var selectorStr = "#" + t.containerID + "-timeline .eraDateGrp ." +
@@ -417,20 +412,20 @@ d3.tl.Timeline.prototype.drawEras = function (targetEraLabel) {
       if (this.__data__.label === targetEraLabel) {
         d3.select(this).style("stroke-width", 2);
       } else {
-        d3.select(this).style("opacity",0.5);
+        d3.select(this).style("opacity", 0.5);
       }
     });
-  };
+  }
   this.D3timeline.append("div")
     .attr("class", "precipEventsPanel");
   this.D3precipEventsPanel =
-            d3.select("#" + this.containerID + "-timeline .precipEventsPanel");            
+            d3.select("#" + this.containerID + "-timeline .precipEventsPanel");
   // grab the <g> element for later delete;
   this.D3erasGrp = d3.select("#" + this.containerID + "-timeline .erasGrp");
 };
 
 /* ======================================================================= */
-d3.tl.Timeline.prototype.drawEraLabels = function (targetLabel) {
+d3.tl.Timeline.prototype.drawEraLabels = function(targetLabel) {
   var t = this;
   // create an invisible div to contain spans used to measure length of
   // longest word;
@@ -440,7 +435,7 @@ d3.tl.Timeline.prototype.drawEraLabels = function (targetLabel) {
       .style("font-family", t.eraLabelsFontFamily)
       .style("font-size", t.eraLabelsFontSize + "px")
       .style("visibility", "hidden");
-  function getLeftAndStoreWidthVoffset (d) {
+  function getLeftAndStoreWidthVoffset(d) {
     /* this function: returns the x-coordinate of the HTML <div> which will
        contain the label (if label is wider than era then must shift div left);
        finds the longest word; gets its width; tests whether wider than the era;
@@ -452,19 +447,19 @@ d3.tl.Timeline.prototype.drawEraLabels = function (targetLabel) {
     d.voffset = d.voffset ? d.voffset : 0;
     // does widest word overflow? Sort by length descending;
     var words = d.label.split(/ /);
-    var longestWord = 
-            words.sort(function(a,b){ return b.length - a.length })[0];
+    var longestWord =
+            words.sort(function(a, b) { return b.length - a.length; })[0];
     // console.log("Longest: " + longestWord);
     // create a span to measure width of widest word;
     var widthSpan = document.createElement('span');
     widthSpan.setAttribute('style', 'font-family: ' + t.eraLabelsFontFamily +
             '; font-size: ' + t.eraLabelsFontSize + 'px');
     widthSpan.innerHTML = longestWord;
-    var cont = document.getElementById('widthSpanContainer'); 
-    cont.appendChild(widthSpan); 
-    // console.log("lastChile.offsetWidth: " + cont.lastChild.offsetWidth); 
+    var cont = document.getElementById('widthSpanContainer');
+    cont.appendChild(widthSpan);
+    // console.log("lastChile.offsetWidth: " + cont.lastChild.offsetWidth);
     // console.log("lastChile.clientWidth: " + cont.lastChild.clientWidth);
-    // NTTB: clientWidth returns 0; 
+    // NTTB: clientWidth returns 0;
     var longestWordWidth = cont.lastChild.offsetWidth;
     // console.log("Width of " + longestWord + ": " + longestWordWidth);
     var widthOfEra = t.timeScale(d.stop) - t.timeScale(d.start);
@@ -492,31 +487,31 @@ d3.tl.Timeline.prototype.drawEraLabels = function (targetLabel) {
       // one div for each object in the array;
     .append("div")
        // used to hide a single label for quizzes;
-      .attr("id", function(d){
+      .attr("id", function(d) {
         return t.containerID + "-" + d.label.replace(/\W/g, "") + "Label" })
       .attr("class", "eraLabel")
       .style("position", "absolute")
       .style("z-index", "1")
       .style("text-align", "center")
-       // if label fits, position against top-left corner of era with same
+      // if label fits, position against top-left corner of era with same
       // width; if not, position to left;
-      .style("left", function(d){ return getLeftAndStoreWidthVoffset(d); })
-      .style("top",  function(d){
+      .style("left", function(d) { return getLeftAndStoreWidthVoffset(d); })
+      .style("top",  function(d) {
                       return (t.eraTopMargin + (d.topY * t.eraHeight)) +
-                             t.eraLabelTopMargin + d.voffset + "px" })
-      .style("width", function(d){ return d.width + "px" })
-      .style("font-family", function(d){
+                              t.eraLabelTopMargin + d.voffset + "px" })
+      .style("width", function(d) { return d.width + "px" })
+      .style("font-family", function(d) {
                 return (d.labelFont ? d.labelFont : this.eraLabelsFontFamily) })
-      .style("font-size", function(d){
+      .style("font-size", function(d) {
                 return (d.labelFontSize ? d.labelFontSize :
                                           t.eraLabelsFontSize) + "px";})
-      .style("color", function(d){
+      .style("color", function(d) {
                 return (d.labelColor ? d.labelColor : "black");})
-      .style("opacity", function(d){ if (targetLabel == undefined ||
-                                         d.label === targetLabel) {
-                return 1} else { return 0.5}; })
+      .style("opacity", function(d) { if (targetLabel == undefined ||
+                                         d.label === targetLabel)
+                                       { return 1; } else { return 0.5; } })
       .style("pointer-events", "none")
-      .text(function(d){ return d.label });
+      .text(function(d) { return d.label });
   // grab the group itself for later delete;
   this.D3eraLabelsGrp = d3.select("#" + this.containerID + "-timeline .eraLabelsGrp");
 
@@ -525,13 +520,11 @@ d3.tl.Timeline.prototype.drawEraLabels = function (targetLabel) {
 };
 
 /* ======================================================================= */
-d3.tl.Timeline.prototype.drawEraDates = function () {
-  if (!this.hasEraDatesOnHover) {
-   console.log(this.hasEraDatesOnHover + ": Skipping era dates"); return; };
+d3.tl.Timeline.prototype.drawEraDates = function() {
   var t = this;
   // each era gets TWO hidden svg text elements; class == class-of-era;
   // mouseover an era causes the pair to appear;
-  // this function is executed twice!        
+  // this function is executed twice!
   function addEraDates (startOrStop) {
     var start = startOrStop == "start" ? true : false;
     t.D3svg.append("g")
@@ -541,14 +534,14 @@ d3.tl.Timeline.prototype.drawEraDates = function () {
         .data(t.erasArr)
         .enter()
       .append("text")
-        .attr("class", function(d){
+        .attr("class", function(d) {
                                 return d.label.replace(/\W/g, "") + " eraDate"})
         // ToDo: use d3 transition to show/hide;
         .classed("hidden", true)
         .attr("text-anchor", "middle")
-        .attr("x", function(d){ return t.timeScale(start ? d.start : d.stop); })
+        .attr("x", function(d) { return t.timeScale(start ? d.start : d.stop); })
         .attr("y", t.eraTopMargin - (0.5 * parseInt(t.eraDateFontSize)))
-        .text(function(d){ return start ? d.start : d.stop })
+        .text(function(d) { return start ? d.start : d.stop })
         .attr("font-family", "sans-serif")
         .attr("font-size", t.eraDateFontSize)
         .attr("fill", "black")
@@ -556,15 +549,15 @@ d3.tl.Timeline.prototype.drawEraDates = function () {
   }
   addEraDates("start");
   addEraDates("stop");
-  
+
   this.D3eraDatesGrps =
              d3.selectAll("#" + t.containerID + "-timeline .eraDateGrp");
   // console.log("Num eraDate elements: " +
-  //  d3.selectAll("#" + t.containerID + "-timeline .eraDate")[0].length);   
+  //  d3.selectAll("#" + t.containerID + "-timeline .eraDate")[0].length);
 };
 
 /* ======================================================================= */
-d3.tl.Timeline.prototype.drawEvents = function () {
+d3.tl.Timeline.prototype.drawEvents = function() {
   var t = this;
   t.D3events = t.D3svg.append("g")
       .attr("class", "eventsGrp")
@@ -573,12 +566,12 @@ d3.tl.Timeline.prototype.drawEvents = function () {
       .enter()
     .append("circle")
       .style("fill", "#666")
-      .attr("id", function(d){ return d.label.replace(/\W/g, "") + "Label" })
-      .attr("cx", function(d){ return t.timeScale(d.date) })
-      .attr("cy", function(d){ 
+      .attr("id", function(d) { return d.label.replace(/\W/g, "") + "Label" })
+      .attr("cx", function(d) { return t.timeScale(d.date) })
+      .attr("cy", function(d) {
                         return (d.centerY * t.eraHeight) + t.eraTopMargin })
       .attr("r",  6)
-      .on("mouseover", function(){
+      .on("mouseover", function() {
         // display the infoPanel under the circle;
         // get position and text for the infoPanel;
         console.log("Event mouseover");
@@ -597,7 +590,7 @@ d3.tl.Timeline.prototype.drawEvents = function () {
                  .duration(500)
                  .style("opacity", 0.95);
       })
-      .on("mouseout", function(){
+      .on("mouseout", function() {
         t.D3precipEventsPanel
                  .transition()
                  .duration(500)
@@ -606,24 +599,24 @@ d3.tl.Timeline.prototype.drawEvents = function () {
 };
 
 /* ======================================================================= */
-d3.tl.Timeline.prototype.setup = function (container) {
+d3.tl.Timeline.prototype.setup = function(container) {
   if (this.scale !== 1) { this.scaleTimeline(this.scale); }
   // adds to DOM inside container;
-  this.styleContainer(container)
-  if (this.hasHeader) { this.addHeaderDiv(); };
+  this.styleContainer(container);
+  if (this.hasHeader) { this.addHeaderDiv(); }
   this.addTimelineDiv();
-  if (this.hasFooter) { this.addFooterDiv(); };
+  if (this.hasFooter) { this.addFooterDiv(); }
 };
 
 /* ======================================================================= */
-d3.tl.Timeline.prototype.draw = function (targetEra) {
+d3.tl.Timeline.prototype.draw = function(targetEra) {
   // draws the entire timeline assuming <container>-timeline div;
   this.drawTimeAxis();
   this.drawEras(targetEra);
   this.drawEraLabels(targetEra);
-  if (this.hasEraDatesOnHover) { this.drawEraDates(); };
-  if (this.hasEvents) { this.drawEvents(); };
-  
+  if (this.hasEraDatesOnHover) { this.drawEraDates(); }
+  if (this.hasEvents) { this.drawEvents(); }
+
   // debug:
   if (this.showD3selectionsInConsole === true) {
     console.log("D3timeline: ", this.D3timeline);
@@ -632,11 +625,11 @@ d3.tl.Timeline.prototype.draw = function (targetEra) {
     console.log("D3eras: ", this.D3eras);
     console.log("D3eraLabelsGrp: ", this.D3eraLabelsGrp);
     console.log("D3eraDatesGrps: ", this.D3eraDatesGrps);
-    }
+  }
 };
 
 /* ======================================================================= */
-d3.tl.drawTimelineInContainer = function (timelineObj, containerID, overrideObj) {
+d3.tl.drawTimelineInContainer = function(timelineObj, containerID, overrideObj) {
   // the timeline arg may be:
   //  1) the full reference to a d3.tl property resulting from including the
   //     timeline data in a <script> tag: first line of file looks like:
@@ -655,7 +648,7 @@ d3.tl.drawTimelineInContainer = function (timelineObj, containerID, overrideObj)
       d3.tl.singleTimeline.loadTimeline(overrideObj);
     } else {
       // should be an array of such objects;
-      overrideObj.forEach( function (arrItem) {
+      overrideObj.forEach(function(arrItem) {
         d3.tl.singleTimeline.loadTimeline(arrItem);
       });
     }
@@ -665,7 +658,7 @@ d3.tl.drawTimelineInContainer = function (timelineObj, containerID, overrideObj)
 };
 
 /* ======================================================================= */
-d3.tl.Timeline.prototype.initQuiz = function (difficulty) {
+d3.tl.Timeline.prototype.initQuiz = function(difficulty) {
   // creates array of labels; stores orig value of erasArr;
   this.hasEraDatesOnHover = false;
   this.hasPrecipEventsOnHover = false;
@@ -675,7 +668,7 @@ d3.tl.Timeline.prototype.initQuiz = function (difficulty) {
   this.quizFudges = 0;
   this.remainingLabels = [];
   // second arg sets value of this within callback (else undefined!);
-  this.erasArr.forEach(function (era) {
+  this.erasArr.forEach(function(era) {
     this.remainingLabels.push(era.label);
   }, this);
 
@@ -709,7 +702,7 @@ d3.tl.Timeline.prototype.initQuiz = function (difficulty) {
                 "font-size": "36px"})
         // missing quizTextbox:focus CSS:
         // border: 5px solid red; border-radius: 10px;
-        .on("input", function () {
+        .on("input", function() {
           var textboxEl = this;
           if (this.value === t.targetLabel ||
               t.answerIsCloseEnough(this.value, t.targetLabel)) {
@@ -726,7 +719,7 @@ d3.tl.Timeline.prototype.initQuiz = function (difficulty) {
                      })
               .html("YES");
             // after two seconds, remove YES and empty textbox;
-            setTimeout(function () {
+            setTimeout(function() {
               textboxEl.value = "";
               d3.select("#" + t.containerID +
                               "-quizPanel .quizPanelYES").remove();
@@ -737,7 +730,7 @@ d3.tl.Timeline.prototype.initQuiz = function (difficulty) {
             var targetLabelD3 = d3.select("#" + t.containerID + "-" +
                                   t.targetLabel.replace(/\W/g, "") + "Label");
             targetLabelD3.style("color", "black");
-            
+
             if (t.remainingLabels.length > 7) {  // production: 0;
               t.nextQuizItem();
             } else {
@@ -746,7 +739,7 @@ d3.tl.Timeline.prototype.initQuiz = function (difficulty) {
           }
           // don't yet have the right answer;
         })
-        .on("keypress", function () {
+        .on("keypress", function() {
           // "d3.event" is a Keyboard Event;
           // hit return, so answer must be wrong;
           if (d3.event.keyCode === 13) {
@@ -758,14 +751,14 @@ d3.tl.Timeline.prototype.initQuiz = function (difficulty) {
               t.scoreQuiz();
             }
           }
-        })
+        });
     }); // END of each;
 
-  this.nextQuizItem();    
+  this.nextQuizItem();
 };
- 
+
 /* ======================================================================= */
-d3.tl.Timeline.prototype.nextQuizItem = function () {
+d3.tl.Timeline.prototype.nextQuizItem = function() {
   this.targetLabel = this.remainingLabels.shift();
   // hide targetLabel with CSS:
   var targetLabelD3 = d3.select("#" + this.containerID + "-" +
@@ -777,12 +770,10 @@ d3.tl.Timeline.prototype.nextQuizItem = function () {
   //set up panel from previous item;
   // value = ""
   // focus;
-  
-  
 };
 
 /* ======================================================================= */
-d3.tl.Timeline.prototype.answerIsCloseEnough = function (answer, label) {
+d3.tl.Timeline.prototype.answerIsCloseEnough = function(answer, label) {
   var labelToAnswerMap = {
     // the answer is compared after conversion to lower-case;
     "Judges": ["the judges", "thejudges", "jugdes"],
@@ -800,7 +791,7 @@ d3.tl.Timeline.prototype.answerIsCloseEnough = function (answer, label) {
   var lcAnswer = answer.toLowerCase();
   var lcLabel = label.toLowerCase();
   console.log(label, labelToAnswerMap[label], lcAnswer, lcLabel);
-  if (lcAnswer === lcLabel) { this.quizFudges++; return true; };
+  if (lcAnswer === lcLabel) { this.quizFudges++; return true; }
   if (labelToAnswerMap[label].indexOf(lcAnswer) > -1) {
     console.log("found: " +
             labelToAnswerMap[label][labelToAnswerMap[label].indexOf(lcAnswer)]);
@@ -810,7 +801,7 @@ d3.tl.Timeline.prototype.answerIsCloseEnough = function (answer, label) {
 };
 
 /* ======================================================================= */
-d3.tl.Timeline.prototype.scoreQuiz = function () {
+d3.tl.Timeline.prototype.scoreQuiz = function() {
   var scoreHTML = "Nice job! You got all the answers.";
   // add scorePanel to DOM;
   var t = this;
@@ -844,16 +835,16 @@ d3.tl.Timeline.prototype.scoreQuiz = function () {
                 "font-size": "20px"})
         // missing quizTextbox:focus CSS:
         // border: 5px solid red; border-radius: 10px;
-        .on("input", function () {
+        .on("input", function() {
           var textboxEl = this;
-        })
+        });
     }); // END of each;
   console.log("END");
 };
 
 /* ======================================================================= */
 // this function is not currently used (or tested);
-d3.tl.Timeline.prototype.removeTimelineContents = function () {
+d3.tl.Timeline.prototype.removeTimelineContents = function() {
   // delete contents of svg;
   var svg = document.querySelector("#" + this.containerID + "-timeline svg");
   while (svg.firstChild) {
