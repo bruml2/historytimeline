@@ -21,17 +21,18 @@ body {
   
   <script src="js/d3.v3.4.11.min.js"></script>
   <script src="js/historytimeline.js"></script>
-  <script src="tl/overviewTL.js"></script>
   <script>
-    // the harvardStyle object overrides a default value;
-    d3.tl.harvardStyle = {
-      "footerHTML": "<span class=\"drawnBy\">This is the canonical version of the Overview Timeline.  To see the exact dates of an era and descriptions of its precipitating and ending events, hover over it.</span>"
+    // demonstrates overriding a default value: create an object then add
+    // it as the (optional) third argument to drawTimelineInContainer.
+    // Of course, the object may have more than one property such as
+    // "footerHTML" and the third argumend may be an array of objects.
+    var overrideObj = {
+      "footerHTML": "<span>This is the canonical version of the Overview Timeline.  To see the exact dates of an era and descriptions of its precipitating and ending events, hover your cursor over it.</span>"
     };
-    // "d3.tl.overviewTL" is an object created by the overviewTL.js
-    // file; it contains the non-default data for the timeline;
-    d3.tl.drawTimelineInContainer(d3.tl.overviewTL,
+    // see the documentation for the alternatives for the first argument;
+    d3.tl.drawTimelineInContainer("tl/overviewTL.json",
                                   "timelineContainer",
-                                  d3.tl.harvardStyle);
+                                  overrideObj);
   </script>
 </body>
 </html>
