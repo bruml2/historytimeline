@@ -11,7 +11,6 @@ d3.tl.Era = function Era(label, start, stop, bgcolor) {
   this.bgcolor = bgcolor || "#F5BCA9";
   this.topY    = 0;
   this.height  = 1.0;
-  this.voffset = 0;
   // overides timeline-wide values;  (TO DO)
   this.labelFontSize   = null;
   this.labelFontFamily = null;
@@ -67,7 +66,7 @@ d3.tl.Timeline = function Timeline(kind) {
   this.axisStopYr  = null;
   this.timeScale = null;
   this.containerID = null;
-  this.footerTextBuffer = null;
+  this.oldFooterHTML = null;
   // htlQuizzer runtime values:
   this.quizCorrect = null;
   this.quizIncorrect = null;
@@ -79,7 +78,7 @@ d3.tl.Timeline = function Timeline(kind) {
   this.erasArr = null;
   this.eraLabelsFontSize = 16;
   this.eraLabelsFontFamily = "Palatino, Times, \"Times New Roman\", Georgia, serif";
-  this.eraLabelTopMargin = 10;
+  this.eraLabelsTopMargin = 10;
   this.eraDateFontSize = 16;
 
   this.containerStyles = function() {
@@ -111,7 +110,6 @@ d3.tl.Timeline = function Timeline(kind) {
   this.D3timeline = null;  // 2nd div inside the container;
   this.D3svg      = null;
   this.D3eras     = null;
-  this.D3erasGrp  = null;
   this.D3eraLabelsGrp = null;
   this.D3eraDatesGrps = null;
   // Builder state:
@@ -135,9 +133,7 @@ d3.tl.Timeline.prototype.loadTimeline = function(tlObj) {
     var newErasArr = tlObj.erasArr.map(function(thisEra, idx, oldEraArr) {
       var newEra = new d3.tl.Era();
       for (key in thisEra) {
-        if (thisEra.hasOwnProperty(key)) {
-          newEra[key] = thisEra[key];
-        }     
+        if (thisEra.hasOwnProperty(key)) { newEra[key] = thisEra[key]; }     
       }
       return newEra;
     });
@@ -165,7 +161,7 @@ d3.tl.Timeline.prototype.loadTimeline = function(tlObj) {
     // console.log("Found eventsArr");
     this.hasEvents = true;
   }
-  console.log("Loaded . . .");
+  console.log("Loaded . . .", tlObj);
 };
 
 /* =============  Timeline setup methods ====================== */
@@ -190,7 +186,7 @@ d3.tl.Timeline.prototype.scaleTimeline = function(scaleBy) {
     "footerPaddingTop",
     "footerPaddingSides",
     "footerMarginTop",
-    "eraLabelTopMargin",
+    "eraLabelsTopMargin",
     "eraLabelsFontSize",
     "eraDateFontSize"
   ];
@@ -268,7 +264,7 @@ d3.tl.Timeline.prototype.addTimelineDiv = function() {
             "  text-rendering: optimizeLegibility; /* SVG attribute */}" +
             ".historytimeline .hidden {" +
             "  display: none; }" +
-            ".precipEventsPanel {" +
+            ".htlPanel {" +
             "  position: absolute;" +
             "  z-index: 2;" +
             "  border: solid 1px #aaa;" +
@@ -278,7 +274,8 @@ d3.tl.Timeline.prototype.addTimelineDiv = function() {
             "  opacity: 0.000001;" +
             "  font: 15px sans-serif;" +
             "  pointer-events: none;}" +
-            ".precipEventsPanel p {" +
+            ".htlPanel p {" +
+            // "  text-indent: 0.6em;" +
             "  margin: 0;" +
             "  padding: 6px}");
   } else {
@@ -305,7 +302,8 @@ d3.tl.Timeline.prototype.addFooterDiv = function() {
       .style({"padding": t.footerPadding,
               "margin-top": t.footerMarginTop + "px",
               "border": "2px solid " + this.borderColor,
-              "font-size": t.footerFontSize + "px"})
+              "font-size": t.footerFontSize + "px",
+              "text-indent": "0.6em"})
       .html(this.footerHTML);
 };
 
@@ -370,63 +368,10 @@ d3.tl.Timeline.prototype.drawEras = function(targetEraLabel) {
       .style("stroke-width", 1)
       .style("stroke", "black")
       // show the two dates and the precipEventsPanel;
-      .on("mouseover", function() {
-        // console.log("mouseover: ", this.__data__.label);
-        if (t.hasEraDatesOnHover && !t.showingAll) {
-          // on mouseover of era, select the two start/stop dates whose class
-          // is the era's id (the dates are text els) and make them visible;
-          var selectorStr = "#" + t.containerID + "-timeline .eraDateGrp ." +
-            this.__data__.label.replace(/\W/g, "");
-          // console.log(selectorStr);
-          d3.selectAll(selectorStr).classed("hidden", false);
-        }
-        if (t.hasPrecipEventsOnHover && !t.showingAll) {
-          // get position and text for the precipEventsPanel; make opaque;
-          var eraObj = this.__data__;
-          var leftX = t.timeScale(eraObj.start) - 10;
-          var topY  = t.eraTopMargin + (eraObj.topY * t.eraHeight) + 46;
-          var panelText = t.precipEventsObj[eraObj.start] +
-                          t.precipEventsObj[eraObj.stop];
-          t.D3precipEventsPanel
-              .style("position", "absolute")
-              .style("left", leftX + "px")
-              .style("top", topY + "px")
-              .style("opacity", 1e-6)
-              .html(panelText)
-            .transition()
-              .duration(400)
-              .style("opacity", 0.95);
-        }
-        if (t.hasFooterTextOnHover) {
-          var D3footer = d3.select("#" + t.containerID + "-footer");
-          t.footerTextBuffer = D3footer.html();
-          D3footer
-              .html(t.footerTextObj[this.__data__.label])
-              // may not be hidden;
-              .classed("hidden", false);
-        }
-      }) // end of mouseover;
-      // hide the two dates and the precipEventsPanel;
-      .on("mouseout", function() {
-        // console.log("mouseout:  " + this.__data__.label);
-        if (!t.showingDates && !t.showingAll && t.hasEraDatesOnHover) {
-          var selectorStr = "#" + t.containerID + "-timeline .eraDateGrp ." +
-            this.__data__.label.replace(/\W/g, "");
-          d3.selectAll(selectorStr).classed("hidden", true);
-        }
-        if (t.hasPrecipEventsOnHover) {
-          t.D3precipEventsPanel
-              .transition()
-              .duration(400)
-              .style("opacity", 1e-6);
-        }
-        if (t.hasFooterTextOnHover) {
-          // restore normal footer contents;
-          d3.select("#" + t.containerID + "-footer")
-              .html(t.footerTextBuffer);
-              // .classed("hidden", true);
-        }
-      });  // end of mouseout;
+      .on("mouseover", eraMouseover)
+      .on("mouseout", eraMouseout);
+      
+  // if there is a targetEraLabel, mark it and reduce the opacity of all the other eras;
   if (targetEraLabel) {
     this.D3eras.each(function(d, i) {
       if (this.__data__.label === targetEraLabel) {
@@ -436,12 +381,76 @@ d3.tl.Timeline.prototype.drawEras = function(targetEraLabel) {
       }
     });
   }
+  // htlPanel class defines the global CSS;
   this.D3timeline.append("div")
-    .attr("class", "precipEventsPanel");
-  this.D3precipEventsPanel =
-            d3.select("#" + this.containerID + "-timeline .precipEventsPanel");
-  // grab the <g> element for later delete;
-  this.D3erasGrp = d3.select("#" + this.containerID + "-timeline .erasGrp");
+    .attr("class", "htlPanel");
+  this.D3panel =
+            d3.select("#" + this.containerID + "-timeline .htlPanel");
+            
+  function eraMouseover() {
+    // console.log("mouseover: ", this.__data__.label);
+    if (t.hasEraDatesOnHover && !t.showingAll) {
+      // on mouseover of era, select the two start/stop dates whose class
+      // is the era's id (the dates are text els) and make them visible;
+      var selectorStr = "#" + t.containerID + "-timeline .eraDateGrp ." +
+        this.__data__.label.replace(/\W/g, "");
+      // console.log(selectorStr);
+      d3.selectAll(selectorStr).classed("hidden", false);
+    }
+    if (t.hasPrecipEventsOnHover && !t.showingAll) {
+      // get position and text for the precipEventsPanel; make opaque;
+      var eraObj = this.__data__;
+      var leftX = t.timeScale(eraObj.start) - 10;
+      var topY  = t.eraTopMargin + (eraObj.topY * t.eraHeight) + 46;
+      var panelText = t.precipEventsObj[eraObj.start] +
+                      t.precipEventsObj[eraObj.stop];
+      t.D3panel
+          .style("position", "absolute")
+          .style("left", leftX + "px")
+          .style("top", topY + "px")
+          .style("opacity", 1e-6)
+          .html(panelText)
+        .transition()
+          .duration(400)
+          .style("opacity", 0.95);
+    }
+    if (t.hasFooterTextOnHover) {
+      var D3footer = d3.select("#" + t.containerID + "-footer");
+      t.oldFooterHTML = D3footer.html();
+      var newHTML = t.footerTextObj[this.__data__.label];
+      // if text is long, break into three columns;
+      if (newHTML.length > 200) {
+        D3footer.style("-webkit-column-count","3");
+      }
+      D3footer
+          .html(newHTML)
+          // usually not hidden;
+          .classed("hidden", false);
+    }
+  }
+            
+  function eraMouseout() {
+    // hide the two dates and the precipEventsPanel;
+    // console.log("mouseout:  " + this.__data__.label);
+    if (!t.showingDates && !t.showingAll && t.hasEraDatesOnHover) {
+      var selectorStr = "#" + t.containerID + "-timeline .eraDateGrp ." +
+        this.__data__.label.replace(/\W/g, "");
+      d3.selectAll(selectorStr).classed("hidden", true);
+    }
+    if (t.hasPrecipEventsOnHover) {
+      t.D3panel
+          .transition()
+          .duration(400)
+          .style("opacity", 1e-6);
+    }
+    if (t.hasFooterTextOnHover) {
+      // restore normal footer contents;
+      d3.select("#" + t.containerID + "-footer")
+          .style("-webkit-column-count","1")
+          .html(t.oldFooterHTML);
+          // .classed("hidden", true);
+    }
+  }
 };
 
 /* ======================================================================= */
@@ -455,16 +464,14 @@ d3.tl.Timeline.prototype.drawEraLabels = function(targetLabel) {
       .style("font-family", t.eraLabelsFontFamily)
       .style("font-size", t.eraLabelsFontSize + "px")
       .style("visibility", "hidden");
-  function getLeftAndStoreWidthVoffset(d) {
+  function getLeftAndStoreWidth(d) {
     /* this function: returns the x-coordinate of the HTML <div> which will
        contain the label (if label is wider than era then must shift div left);
        finds the longest word; gets its width; tests whether wider than the era;
        if not, returns the x-coorinate of the era-start; if so, returns the
-       x-coordinate for the wider <div>; stores two values in d (the eraObj):
-       the width of the <div> and 0 for voffset if property is missing;
+       x-coordinate for the wider <div>; stores the width of the <div> in d
+       (the eraObj):
     */
-    // add a missing voffset property (pushes label down);
-    d.voffset = d.voffset ? d.voffset : 0;
     // does widest word overflow? Sort by length descending;
     var words = d.label.split(/ /);
     var longestWord =
@@ -477,8 +484,8 @@ d3.tl.Timeline.prototype.drawEraLabels = function(targetLabel) {
     widthSpan.innerHTML = longestWord;
     var cont = document.getElementById('widthSpanContainer');
     cont.appendChild(widthSpan);
-    // console.log("lastChile.offsetWidth: " + cont.lastChild.offsetWidth);
-    // console.log("lastChile.clientWidth: " + cont.lastChild.clientWidth);
+    // console.log("lastChild.offsetWidth: " + cont.lastChild.offsetWidth);
+    // console.log("lastChild.clientWidth: " + cont.lastChild.clientWidth);
     // NTTB: clientWidth returns 0;
     var longestWordWidth = cont.lastChild.offsetWidth;
     // console.log("Width of " + longestWord + ": " + longestWordWidth);
@@ -515,13 +522,14 @@ d3.tl.Timeline.prototype.drawEraLabels = function(targetLabel) {
       .style("text-align", "center")
       // if label fits, position against top-left corner of era with same
       // width; if not, position to left;
-      .style("left", function(d) { return getLeftAndStoreWidthVoffset(d); })
+      .style("left", function(d) { return getLeftAndStoreWidth(d); })
       .style("top",  function(d) {
-                      return (t.eraTopMargin + (d.topY * t.eraHeight)) +
-                              t.eraLabelTopMargin + d.voffset + "px" })
+            return (t.eraTopMargin + (d.topY * t.eraHeight)) +
+                    (d.labelTopMargin ? d.labelTopMargin : t.eraLabelsTopMargin) + "px" })
       .style("width", function(d) { return d.width + "px" })
       .style("font-family", function(d) {
-                return (d.labelFont ? d.labelFont : this.eraLabelsFontFamily) })
+                return (d.labelFontFamily ? d.labelFontFamily :
+                                            this.eraLabelsFontFamily) })
       .style("font-size", function(d) {
                 return (d.labelFontSize ? d.labelFontSize :
                                           t.eraLabelsFontSize) + "px";})
@@ -595,14 +603,15 @@ d3.tl.Timeline.prototype.drawEvents = function() {
         // display the infoPanel under the circle;
         // get position and text for the infoPanel;
         console.log("Event mouseover");
-        var d = this.__data__;
-        var leftX = t.timeScale(d.date) - 30;
-        var topY  = t.eraTopMargin + (d.centerY * t.eraHeight) + 16;
-        var panelText = d.label;
-        console.log(t.D3precipEventsPanel);
-        t.D3precipEventsPanel.style("max-width", "200px")
+        var eraObj = this.__data__;
+        var leftX = t.timeScale(eraObj.date) - 30;
+        var topY  = t.eraTopMargin + (eraObj.centerY * t.eraHeight) + 16;
+        var panelText = eraObj.label;
+        console.log(t.D3panel);
+        t.D3panel.style("max-width", "200px")
                  .style("position", "absolute")
-                 .style("left", function(d) { return leftX + "px" })
+                 // .style("left", function(d) { return leftX + "px" })
+                 .style("left", leftX + "px")
                  .style("top", topY + "px")
                  .style("opacity", 1e-6)
                  .html(panelText)
@@ -611,8 +620,7 @@ d3.tl.Timeline.prototype.drawEvents = function() {
                  .style("opacity", 0.95);
       })
       .on("mouseout", function() {
-        t.D3precipEventsPanel
-                 .transition()
+        t.D3panel.transition()
                  .duration(500)
                  .style("opacity", 1e-6);
       });
@@ -637,11 +645,12 @@ d3.tl.Timeline.prototype.draw = function(targetEra) {
   if (this.hasEraDatesOnHover) { this.drawEraDates(); }
   if (this.hasEvents) { this.drawEvents(); }
 
+  // d3.select("#ideasBasicContainer-JewishApocalypticismEra").trigger("mouseover");
+
   // debug:
   if (this.showD3selectionsInConsole === true) {
     console.log("D3timeline: ", this.D3timeline);
     console.log("D3svg: ", this.D3svg);
-    console.log("D3erasGrp: ", this.D3erasGrp);
     console.log("D3eras: ", this.D3eras);
     console.log("D3eraLabelsGrp: ", this.D3eraLabelsGrp);
     console.log("D3eraDatesGrps: ", this.D3eraDatesGrps);
@@ -649,7 +658,7 @@ d3.tl.Timeline.prototype.draw = function(targetEra) {
 };
 
 /* ======================================================================= */
-d3.tl.drawTimelineInContainer = function(timelineObj, containerID, overrideObj) {
+d3.tl.drawTimelineInContainer = function(timelineRef, containerID, overrideObj) {
   // the timeline arg may be:
   //  1) the full reference to a d3.tl property resulting from including the
   //     timeline data in a <script> tag: first line of file looks like:
@@ -662,8 +671,32 @@ d3.tl.drawTimelineInContainer = function(timelineObj, containerID, overrideObj) 
   d3.tl.singleTimeline = new d3.tl.Timeline();
   // if the timeline data is not already a d3.tl object, then do what's
   // necessary to create it here (probably just d3.json(...));
-  d3.tl.singleTimeline.loadTimeline(timelineObj);
-  if (overrideObj) {
+  if (typeof timelineRef === "string") {
+    // could be json filename; could be TL title;
+    if (timelineRef.substr(-5) === ".json") {
+      // get filename;
+      var filename = timelineRef.substr(0, timelineRef.length - 5);
+      if (filename.lastIndexOf("/") > -1) { filename = filename.substr(filename.lastIndexOf("/") + 1); }
+      console.log(timelineRef, filename);
+      d3.json(timelineRef, function(error, tlObj) {
+        if (error) { console.log("Error in json: " + error); }
+        d3.tl.singleTimeline.loadTimeline(tlObj);
+        // d3.tl[filename] = json;
+        if (overrideObj) { loadOverrides(overrideObj); }
+        console.dir(d3.tl.singleTimeline);
+        d3.tl.singleTimeline.setup(containerID);
+        d3.tl.singleTimeline.draw();
+      });
+    } else if (timelineRef.substr(-3) === ".js"){
+    } else {
+      throw error("bad filename");
+    }
+    
+  } else if (typeof d3.tl[timelineRef] === "object") {
+    d3.tl.singleTimeline.loadTimeline(timelineObj);
+  }
+
+  function loadOverrides(overrideObj) { 
     if (typeof(overrideObj) === "object") {
       d3.tl.singleTimeline.loadTimeline(overrideObj);
     } else {
@@ -673,8 +706,6 @@ d3.tl.drawTimelineInContainer = function(timelineObj, containerID, overrideObj) 
       });
     }
   }
-  d3.tl.singleTimeline.setup(containerID);
-  d3.tl.singleTimeline.draw();
 };
 
 /* ======================================================================= */
@@ -875,6 +906,28 @@ d3.tl.Timeline.prototype.removeTimelineContents = function() {
   d3.select("#" + this.containerID + "-timeline .precipEventsPanel").remove();
   // delete eraLabelsGrp;
   d3.select("#" + this.containerID + "-timeline .eraLabelsGrp").remove();
+};
+
+/* =============  Panel constructor ====================== */
+d3.tl.Panel = function(selector, kind) {
+  this.D3selection = d3.select(selector);
+  this.kind = kind;
+  this.style = {
+  };
+  switch (kind) {
+    case "precipEvents":
+      break;
+    case "quiz":
+      break;
+    case "quizScore":
+      break;
+    default:
+      throw error;
+  }
+  
+};
+
+d3.tl.Panel.prototype.drawAndShow = function() {
 };
 
 /* ========== END OF CODE ================================================ */
