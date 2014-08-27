@@ -1,0 +1,58 @@
+{
+  "tlid": "HBprophets1",
+  "dataOrigin": "HBprophets1TL.json",
+  "title": "The Prophets in Context",
+  "subtitle": "",  
+  "erasArr": [
+    {"label": "Northern Kingdom (Israel)", "start": -931, "stop": -722, "bgcolor": "#F5A9E1", "topY": 0, "height": 0.7},
+    {"label": "Southern Kingdom (Judah)", "start": -931, "stop": -586, "bgcolor": "#F5A9BC", "topY": 0.7, "height": 0.3},
+    {"label": "Exile", "start": -586, "stop": -538, "bgcolor": "#F78181"},
+    {"label": "Persian Period", "start": -538, "stop": -332, "bgcolor": "#A9BCF5"},
+    {"label": "King Josiah", "start": -641, "stop": -609, "bgcolor": "#8CD4FF", "topY": 0.7, "height": 0.3, "voffset": -3}
+  ],
+  "peopleArr": [
+    {"label": "Amos", "start": -775, "stop": -745,
+       "startcolor": "red", "stopcolor": "red",
+       "topY": 0.2, "height": 0.06, "voffset": -7,
+       "labelcolor": "blue", "bgcolor": "white"},
+    {"label": "Hosea", "start": -780, "stop": -725,
+       "startcolor": "red", "stopcolor": "red",
+       "topY": 0.35, "height": 0.06, "voffset": -7,
+       "labelcolor": "blue", "bgcolor": "white"},
+    {"label": "Isaiah", "start": -743, "stop": -696,
+       "startcolor": "red", "stopcolor": "red",
+       "topY": 0.85, "height": 0.06, "voffset": -7,
+       "labelcolor": "blue", "bgcolor": "white"},
+    {"label": "Jeremiah", "start": -626, "stop": -580,
+       "startcolor": "red", "stopcolor": "red",
+       "topY": 0.84, "height": 0.06, "voffset": -7,
+       "labelcolor": "blue", "bgcolor": "white"},
+    {"label": "Ezekiel", "start": -622, "stop": -567,
+       "startcolor": "red", "stopcolor": "red",
+       "topY": 0.92, "height": 0.06, "voffset": -7,
+       "labelcolor": "blue", "bgcolor": "white"},
+    {"label": "Ezra", "start": -480, "stop": -440,
+       "topY": 0.3, "height": 0.06, "voffset": -7,
+       "labelcolor": "black", "bgcolor": "#F9F8F6"},
+    {"label": "Nehemiah", "start": -420, "stop": -380,
+       "startcolor": "red", "stopcolor": "red",
+       "topY": 0.38, "height": 0.06, "voffset": -7,
+       "labelcolor": "black", "bgcolor": "#F9F8F6"}
+  ],
+  "precipEventsObj": {
+    "-931": "<p>In <b>931 BCE</b>, on the death of <b>Solomon</b>, his son and successor declined to lighten the heavy taxation imposed by his father and the ten northern tribes broke away to become the Kingdom of Israel.  The remaining two tribes (Judah and Benjamin) remained loyal to the Davidic house and formed the southern kingdom, the Kingdom of Judah.</p>",
+    "-722": "<p>In <b>722 BCE</b>, <b>Assyria</b> conquered the Northern Kingdom and forced the people to resettle elsewhere.  Many fled to the Southern Kingdom but the others remain unaccounted for.</p>",
+    "-586": "<p>In <b>586 BCE</b>, Babylonia under <b>King Nebuchadnezzar II</b> conquered the Southern Kingdom and destroyed the Temple. The elites had been sent into exile in Babylon ten years earlier (-597).</p>",
+    "-538": "<p>In <b>539 BCE</b>, the Persians under <b>Cyrus</b> conquered Babylonia and in the following year Cyrus' famous edict gave permission to the Judeans to return to Jerusalem to rebuild their temple.</p>",
+    "-332": "<p>In <b>334/332 BCE</b>, <b>Alexander the Great</b> conquered Judaea while passing through on his way to Persia and points east.  When he died ten years later (-323), Judaea became part of the Egyptian empire of the Ptolemies.  In <b>200 BCE</b> it came under the control of the Seleucid Empire.</p>"
+  },
+  "footerTextObj": {
+    "Amos": "<p><b>Shaye</b> will write this text.</p>", 
+    "Hosea": "<p><b>Shaye</b> will write this text.</p>", 
+    "Isaiah": "<p><b>Shaye</b> will write this text.</p>", 
+    "Jeremiah": "<p><b>Shaye</b> will write this text.</p>", 
+    "Ezekiel": "<p><b>Shaye</b> will write this text.</p>",
+    "Ezra": "<p><b>Shaye</b> will write this text.</p>", 
+    "Nehemiah": "<p><b>Shaye</b> will write this text.</p>"
+  }
+}
