@@ -660,49 +660,64 @@ d3.tl.Timeline.prototype.draw = function(targetEra) {
 /* ======================================================================= */
 d3.tl.drawTimelineInContainer = function(timelineRef, containerID, overrideObj) {
   // the timeline arg may be:
-  //  1) the full reference to a d3.tl property resulting from including the
-  //     timeline data in a <script> tag: first line of file looks like:
-  //       d3.tl.overviewTL = { <the timeline data and default overrides> };
-  //  2) the URL of a file in the above format (creates d3.tl property) (TO DO);
-  //  3) a string which matches the title of a timeline in the database (TODO);
+  //  3) a string which matches the tlid of a timeline in the database (TODO);
   //  4) a value which matches the tlid of a timeline in the database (TODO);
   // the containerID arg is a string: the id of the container <div>;
   // NB: this one-call interface only works for a single timeline on the page;
-  d3.tl.singleTimeline = new d3.tl.Timeline();
+  var tlMap = {
+    "HBoverview1": "9dcb7169221a03d8234ed9ee7000021b",
+    "HBideasBasic1": "76c15ecd14a7b61d60e5b1d835000639",
+    "HBprophets1": "cef3c17177f31e9f2c4734f1e2000690"
+  };
   // if the timeline data is not already a d3.tl object, then do what's
   // necessary to create it here (probably just d3.json(...));
   if (typeof timelineRef === "string") {
     // could be json filename; could be TL title;
     if (timelineRef.substr(-5) === ".json") {
-      // get filename;
-      var filename = timelineRef.substr(0, timelineRef.length - 5);
-      if (filename.lastIndexOf("/") > -1) { filename = filename.substr(filename.lastIndexOf("/") + 1); }
-      console.log(timelineRef, filename);
       d3.json(timelineRef, function(error, tlObj) {
         if (error) { console.log("Error in json: " + error); }
-        d3.tl.singleTimeline.loadTimeline(tlObj);
-        // d3.tl[filename] = json;
-        if (overrideObj) { loadOverrides(overrideObj); }
-        console.dir(d3.tl.singleTimeline);
-        d3.tl.singleTimeline.setup(containerID);
-        d3.tl.singleTimeline.draw();
+        var UUID = getUUID();
+        d3.tl[UUID] = new d3.tl.Timeline();
+        d3.tl[UUID].loadTimeline(tlObj);
+        if (overrideObj) { loadOverrides(UUID, overrideObj); }
+        console.dir(d3.tl[UUID]);
+        d3.tl[UUID].setup(containerID);
+        d3.tl[UUID].draw();
       });
-    } else if (timelineRef.substr(-3) === ".js"){
+    } else if (tlMap[timelineRef]){
+      // fetch from DB and continue;
+      console.log("DB URL: " + "http://historytimelines.iriscouch.com/tl/" + tlMap[timelineRef]);
+      d3.json("http://historytimelines.iriscouch.com/tl/" + tlMap[timelineRef], function(error, dbObj) {
+        if (error) return console.warn(error);
+        console.log("DB Obj: ", dbObj);
+        console.log("DB tl Obj: ", dbObj.tl);
+        var UUID = getUUID();
+        d3.tl[UUID] = new d3.tl.Timeline();
+        d3.tl[UUID].loadTimeline(dbObj.tl);
+        if (overrideObj) { loadOverrides(UUID, overrideObj); }
+        console.dir(d3.tl[UUID]);
+        d3.tl[UUID].setup(containerID);
+        d3.tl[UUID].draw();
+      });
     } else {
-      throw error("bad filename");
+      throw error("bad argument: should be *.json or a DB tlid");
     }
-    
   } else if (typeof d3.tl[timelineRef] === "object") {
-    d3.tl.singleTimeline.loadTimeline(timelineObj);
+    // this is not yet tested and is probably a bad idea;
+    d3.tl[UUID].loadTimeline(timelineObj);
   }
 
-  function loadOverrides(overrideObj) { 
+  function getUUID() {
+    return performance.now().toString().substr(-9);
+  }
+  
+  function loadOverrides(UUID, overrideObj) { 
     if (typeof(overrideObj) === "object") {
-      d3.tl.singleTimeline.loadTimeline(overrideObj);
+      d3.tl[UUID].loadTimeline(overrideObj);
     } else {
       // should be an array of such objects;
       overrideObj.forEach(function(arrItem) {
-        d3.tl.singleTimeline.loadTimeline(arrItem);
+        d3.tl[UUID].loadTimeline(arrItem);
       });
     }
   }
@@ -930,4 +945,30 @@ d3.tl.Panel = function(selector, kind) {
 d3.tl.Panel.prototype.drawAndShow = function() {
 };
 
+/* =============  couchdb tests ====================== */
+d3.tl.checkDB = function(container) {
+  var tlMap = {
+    "HBoverview1": "9dcb7169221a03d8234ed9ee7000021b"
+  };
+  console.log("Checking DB");
+  // for custom headers: add ".header("foo", "bar");
+  d3.json("http://historytimelines.iriscouch.com/").get(function(error, resp) {
+    if (error) return console.warn(error);
+    console.log(resp);
+    console.log(resp.couchdb);
+    d3.select("#" + container).append("div").attr("id", "couchresp").html(resp.couchdb);
+  });
+  
+  d3.json("http://historytimelines.iriscouch.com/tl/9dcb7169221a03d8234ed9ee7000021b", function(error, resp) {
+    if (error) return console.warn(error);
+    console.log(resp);
+    console.log(resp.tl);
+    console.log(resp["tl"]);
+  });
+};
+/*
+http://127.0.0.1:5984/_uuids  =>  {"uuids":["6e1295ed6c29495e54cc05947f18c8af"]}
+
+
+*/
 /* ========== END OF CODE ================================================ */
