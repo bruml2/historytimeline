@@ -1,0 +1,90 @@
+
+d3 Notes:
+
+====================
+from: http://bost.ocks.org/mike/transition/
+
+fadeIn/fadeOut: use 1e-6 and NOT 0!!
+
+When interpolating to or from zero, some interpolated values may be very small. JavaScript formats small numbers in exponential notation, which unfortunately is not supported by CSS. For example, when transitioning opacity to fade in or out, the number 0.0000001 is converted to the string "1e-7" and then ignored, giving the default value of 1! To avoid distracting flicker, start or end the transition at 1e-6 rather than 0; this is the smallest value not formatted in exponential notation.
+
+When using transitions in conjunction with the general update pattern, first perform the data-join on selections using enter and exit. Then derive transitions on each subselection as desired.
+
+var bar = svg.selectAll(".bar")
+    .data(data, function(d) { return d.key; });
+
+bar.enter().append("rect")
+    .attr("class", "bar")
+    … // initialize entering bars
+
+bar.transition()
+    … // transition entering + updating bars
+
+bar.exit().transition()
+    … // transition exiting bars
+    .remove();
+
+For convenience, there are a few exceptions to this rule. You can transition.remove to remove an element at the end of the transition; likewise, transition.text sets the text content at the start of the transition, without interpolating. In the future, transitions may support additional non-interpolatable operations, such as classed and html.
+
+You can schedule successive transitions using transition.transition, which creates a new transition whose delay immediately follows the existing transition.
+
+
+===================
+Axes      http://alignedleft.com/tutorials/d3/axes
+
+When an axis function is called, it doesn’t return a value, but generates the visual elements of the axis, including lines, labels, and ticks.
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .tickSize(0)
+    .tickPadding(6)
+    .orient("bottom");
+
+We can also specify where the labels should appear relative to the axis itself. The default is bottom, meaning the labels will appear below the axis line. (Although this is the default, it can’t hurt to specify it explicitly.)
+
+xAxis.orient("bottom");
+
+Finally, to actually generate the axis and insert all those little lines and labels into our SVG, we must call the xAxis function:
+
+svg.append("g")
+    .attr("class", "axis")
+    .attr("transform", "translate(0," + (h - padding) + ")")
+    .call(xAxis);
+
+D3’s call() function takes a selection as input and hands that selection off to any function. So, in this case, we have just appended a new g group element to contain all of our about-to-be-generated axis elements.
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+}
+
+As you would imagine, you can customize all aspects of your axes, starting with the rough number of ticks, using ticks():
+
+var xAxis = d3.svg.axis()
+                  .scale(xScale)
+                  .orient("bottom")
+                  .ticks(5);  //Set rough # of ticks
+
+more control over how the axis labels are formatted. Enter tickFormat(), which enables you to specify how your numbers should be formatted.
+
+for example, says to treat values as percentages with one decimal point precision. (See the reference entry for d3.format() for more options.)
+
+var formatAsPercentage = d3.format(".1%");
+Then, tell your axis to use that formatting function for its ticks, e.g.:
+
+xAxis.tickFormat(formatAsPercentage);
+
+
+
+
+
+
+
+

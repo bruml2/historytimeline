@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<!-- this is svgTextTests.html begun August 28, 2014 -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>SVG Text Tests</title>
+  <style>
+body {
+  background-color: #D4CBC2;
+  font-family: Palatino, serif;
+}
+.tlContainer {
+  padding: 20px 10px;
+  margin-bottom: 20px;
+}
+  </style>
+</head>
+<body>
+  <h1>SVG Text Tests</h1>
+  <div id="timelineContainer" class="tlContainer"></div>
+  
+  <script src="js/d3.v3.4.11.min.js"></script>
+  <!-- <script src="js/historytimeline.js"></script> -->
+
+<script>
+d3.select("#timelineContainer")
+    .style({"position": "relative"})
+  .append("svg")
+    .attr("id", "svgEnvel")
+    .style({"width": 800,
+            "height": 400,
+            "border": "2px solid #A41034",
+            "border-radius": 6,
+            "background-color": "bisque"})
+  .append("rect")
+    .attr("id", "Era1")
+    .attr("class", "era")
+    .attr("x", 50)
+    .attr("y", 50)
+    // slightly rounded corners;
+    .attr("rx", 4)
+    .attr("ry", 4)
+    .attr("width", 200)
+    .attr("height", 300)
+    .style("fill", "wheat")
+    .style("stroke-width", 1)
+    .style("stroke", "black");
+
+
+
+  /*
+  d3.tl.drawTimelineInContainer("tl/HBbibleBooks1TL.json",
+                                "timelineContainer");
+  */
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+
+Walkthrough of fancyInput.js
+================================
+
+fancyInput.js is a jQuery plugin (adds a new method to $). It also adds a global fancyInput property to window containing the methods of the plugin.
+
+It is written as an “immediately invoked function expression” IIFE) which assigns to $.fn.fancyInput a function which checks for !isIE or ???? and then calls its init() function.
+
+init()
+——————
+

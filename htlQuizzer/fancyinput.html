@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<!-- this is htlQuizzer/fancyinput.html begun August 8, 2014 -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Fancy Input Mockup</title>
+  <link href="css/fancyInput.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Fjalla+One">
+  <style>
+body {
+  background-color: wheat;
+  font-family: Palatino, serif;
+}
+header {
+  width: 1200px;
+  text-align: center;
+  font-family: 'Fjalla One', 'Palatino', sans-serif;
+  text-shadow: 4px 4px 4px #aaa;
+}
+main {
+  position: relative;
+  /*
+  */
+}
+.tlContainer {
+  padding: 20px 10px;
+  border: 2px solid green;
+  margin-bottom: 20px;
+  
+}
+svg {
+  width: 1200px;
+  height: 380px;
+  border: 2px solid #A41034;
+  background-color: bisque;
+}
+.precipEventsPanel {
+  position: absolute;
+  z-index: 2;
+  border: solid 1px #aaa;
+  border-radius: 8px;
+  background: aliceblue;
+  max-width: 400px;
+  opacity: 0.000001;
+  /* font: 15px sans-serif; */
+  pointer-events: none;
+}
+.precipEventsPanel p {          
+  margin: 0;
+  padding: 6px;
+}
+#quizContainer .fancyInput {
+  
+}
+/*
+@font-face {
+  font-family: 'Fjalla One';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Fjalla One'), local('FjallaOne-Regular'), url(http://themes.googleusercontent.com/static/fonts/fjallaone/v1/rxxXUYj4oZ6Q5oDJFtEd6hsxEYwM7FgeyaSgU71cLG0.woff) format('woff');
+}
+*/
+  </style>
+</head>
+<body>
+<header>
+  <h1>Fancy Input Mockup</h1>
+</header>
+
+<main>
+  <div id="quizContainer" class="tlContainer">
+    <svg></svg>
+    <div class="precipEventsPanel">
+      <p>This is some text in the panel.</p><br />
+      <div id="fancyInputWrapper">
+        <input class="hasFancyInput" type="text" />
+      </div>
+    <div>
+  </div>
+</main>
+
+<footer>
+  <p>This is version 0.01.</p>
+</footer>
+<script src="../js/d3.v3.4.11.min.js"></script>
+<script src="../js/jquery-2.1.1.min.js"></script>
+<script src="js/fancyInput.js"></script>
+<script>
+$(document).ready( function () {
+  $("div :input").fancyInput();
+  // fill panel;
+  var $panel = $(".precipEventsPanel");
+  d3.select(".precipEventsPanel")
+    .style("left", "100px")
+    .style("top", "100px")
+    .transition()
+    .style("opacity", 1);
+  
+  
+});
+</script>
+<!--
+  <script src="../js/historytimeline.js"></script>
+  <script src="../tl/overviewTL.js"></script>
+  <script>
+// =================
+d3.tl.quiz = new d3.tl.Timeline();
+d3.tl.quiz.loadTimeline(d3.tl.overviewTL);
+d3.tl.quizStyle = {
+  "borderColor": "#A41034",
+  "footerHTML": "<span class=\"drawnBy\">This is the easy quiz.</span>"
+};
+d3.tl.quiz.loadTimeline(d3.tl.quizStyle);
+d3.tl.quiz.setup("quizContainer");
+d3.tl.quiz.draw();
+d3.tl.quiz.initQuiz("easy");
+d3.tl.quiz.nextQuizItem();
+  </script>
+  -->
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>Ruml Fancy Input</title>
+	<meta name="description" content="Makes HTML input field typing fun with some CSS3 effects">
+	<meta name="viewport" content="width=device-width">
+	<link rel="shortcut icon" href="favicon.ico">
+	<link rel="stylesheet" href="styles.css">
+	<link rel="stylesheet" href="fancyInput.css">
+	<!--
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script> -->
+	<script src="../../js/jquery-2.1.1.min.js"></script>
+</head>
+<body>
+	<div id='wrap'>
+		
+		<div id='content'>
+			<section class='input'>
+				<div>
+					<input type='text' placeholder='era label here...' value="foo">
+				</div>
+			</section>
+			<section class='textarea'>
+				<div>
+					<textarea cols='1'>Existing text.</textarea>
+				</div>
+			</section>
+		</div>
+		
+	</div>
+	<script src='fancyInput.js'></script>
+	<script>
+	
+	  // :input is a jQ extension which selects input, textarea, select, button;
+	  // the relevant property of a textarea is not value but textContent;
+		$('section :input').val('').fancyInput()[0].focus();
+
+		// Everything below is only for the DEMO
+		function init(){
+			var input = $('section input').val('')[0]; // [0] gets HTML el;
+			var	s = 'era label here... ✌'.split('').reverse();
+			var	s_lastIdx = s.length-1;
+			console.log("lastIdx", s.length, s_lastIdx);
+			// creates a new Event object which can be used with trigger();
+			var	e = $.Event('keypress');
+				
+		  input.nextElementSibling.className = '';  // the <div>
+			
+			var	initInterval = setInterval(function(){
+  			// every 150ms, writes next letter to the <div> at idx arg3;
+        if( s.length ){
+          var c = s.pop();
+          fancyInput.writer(c, input, s_lastIdx - s.length).setCaret(input);
+          input.value += c;
+          //e.charCode = c.charCodeAt(0);
+          //input.trigger(e);
+          
+        }
+        else clearInterval(initInterval);
+			},150);
+		}
+		
+		init();
+		
+		$('menu').on('click', 'button', toggleEffect);
+		$('menu.radio').on('change', 'input', changeForm).find('input:first').prop('checked',true).trigger('change');
+		
+		// change effects
+		function toggleEffect(num){
+			var className = '';
+				idx = $(this).index() + 1,
+				$fancyInput = $('.fancyInput');
+
+			if( idx > 1 )
+				className = 'effect' + idx;
+
+			$('#content').prop('class', className);
+			$fancyInput.find(':input')[0].focus();
+			
+			$(this).addClass('active').siblings().removeClass('active');
+		}
+		
+		function changeForm(e){
+			// radio buttons stuff
+			var page = this.value,
+				highlight = $(e.delegateTarget).find('> div'),
+				label = $(this.parentNode),
+				marginLeft = parseInt( label.css('margin-left') , 10 ),
+				xPos;
+				
+			highlight.css({'left':label.position().left + marginLeft, 'width':label.width() });
+			
+			// page change stuff
+			xPos = '-' + label.index() * 50;
+			$('#content').css( 'transform', 'translateX(' + xPos + '%)' );
+			
+			setTimeout(function(){
+				$('#content').find('.' + page  + ' :input')[0].focus();
+			}, 100);
+		}
+		
+	</script>
+</body> 
+</html>

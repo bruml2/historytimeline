@@ -1,0 +1,44 @@
+historytimeline TO DO
+
+new HTML page which quizzes on labels and dates;
+
+  easy (with other labels); hard (left to right); harder (random)
+  localStorage for results;
+
+===============================================
+drawTimelineInContainer(timeline, container)
+ timeline can be string title, id, or url of json
+
+Make a Panel class;
+
+===============================================
+Getters and Setters
+
+==> WTF?  var temperature should not make temperature a property of the instantiated
+    object.  But then there is a call to arc.temperature????
+
+from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/defineProperty
+
+function Archiver() {
+  var temperature = null;
+  var archive = [];
+
+  Object.defineProperty(this, "temperature",{
+    get: function() {
+      console.log("get!"); 
+      return temperature; 
+    },
+    set: function(value) { 
+      temperature = value; 
+      archive.push({val: temperature}); 
+    }
+  });
+
+  this.getArchive = function() {return archive;};
+}
+
+var arc = new Archiver();
+arc.temperature; // "get!"
+arc.temperature = 11; 
+arc.temperature = 13; 
+arc.getArchive(); // [{val: 11}, {val: 13}]

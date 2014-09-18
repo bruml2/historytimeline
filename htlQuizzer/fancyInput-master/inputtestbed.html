@@ -1,0 +1,61 @@
+<!DOCTYPE HTML>
+<html lang="en">
+  <!--
+    http://stackoverflow.com/questions/1288297/jquery-auto-size-text-input-not-textarea
+  -->
+<head>
+	<meta charset="utf-8">
+	<title>Ruml Testbed</title>
+	<meta name="viewport" content="width=device-width">
+	<script src="../../js/jquery-2.1.1.min.js"></script>
+	<style>
+body {
+  margin: 0;
+  padding: 0;
+}
+#wrap {
+  position: relative;
+  height: 600px;
+  background-color: beige;
+  border: 2px solid green;
+}
+article {
+  position: absolute;
+  left: 200px;
+  top: 100px;
+  padding: 20px 40px;
+  text-align: center;
+  background-color: wheat;
+}
+article p {
+  margin-top: 0;
+  margin-bottom: 0.5em;
+}
+input#raw {
+  padding-left: 0.3em;
+  font-size: 36px;
+  z-index: 99;
+}
+input#raw:focus {
+  border: 5px solid red;
+  border-radius: 10px;
+}
+  </style>
+</head>
+<body>
+	<div id='wrap'>
+		
+		<article>
+  		<p>What is the name of the era with the red star?</p>
+  		<input id="raw" type="text" placeholder="type answer here" value="" size="20">
+    </article>
+		
+	</div>
+	<script>
+var foo = $("#raw");
+console.dir(foo);		
+		
+		
+	</script>
+</body> 
+</html>
