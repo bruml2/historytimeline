@@ -8,7 +8,7 @@ All of the code and documentation is available on GitHub [here](https://github.c
 
 ### Features
 
-Of course, the main point is to draw a beautiful timeline which clearly depicts the information provided by the timeline's creator. The timeline above displays a series of labelled **eras** commonly used in the study of the Hebrew Bible. There is a live version [here]().
+Of course, the main point is to draw a beautiful timeline which clearly depicts the information provided by the timeline's creator. The timeline above displays a series of labelled **eras** commonly used in the study of the Hebrew Bible. There is a live version [here](http://ruml.com/thehebrewbible/timelines/overview.html).
 
 One problem with many timelines is excessive busyness: too much information being displayed at once.  So a major challenge is to hide the second-level information until the user asks for it in some simple way. Two relevant kinds of information are not shown on the timeline above: the start and end dates of each era and the description of what caused an era to begin and end.
 
