@@ -185,6 +185,10 @@ img {
   <script src="../js/historytimeline.js"></script>
   <script>
     var currtl = new d3.tl.Timeline();
+    // Builder state:
+    currtl.builderMinMax = {}; // props: minDate, maxDate;
+    currtl.created = new Date();
+    currtl.lastModified = new Date();
     // set timeaxis defaults and empty erasArr;
     currtl.axisStartYr = -1500;
     currtl.axisStopYr  = 2014;
