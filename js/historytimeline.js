@@ -61,7 +61,6 @@ d3.tl.Timeline = function Timeline(kind) {
   });
   this.footerMarginTop = 20;
   // runtime values:
-  this.dataOrigin = null;
   this.axisStartYr = null;  // used when not null;
   this.axisStopYr  = null;
   this.timeScale = null;
