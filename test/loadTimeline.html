@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!-- historytimeline/test/loadTimeline.html  9-18-14 -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>loadTimeline Test</title>
+  <link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.15.0.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <script src="//code.jquery.com/qunit/qunit-1.15.0.js"></script>
+  <script src="../js/d3.v3.4.11.min.js"></script>
+  <script src="../js/historytimelineBase.js"></script>
+  <script>
+window.testtl = null;
+QUnit.test( "loadTimeline", function( assert ) {
+  var value = "hello";
+  assert.equal( value, "hello", "We expect value to be hello" );
+  //==================
+  testtl = new d3.tl.Timeline();
+  assert.equal( testtl.erasArr, null, "raw timeline has null erasArr" );
+  //==================
+  var tlObj = {
+        "erasArr": [
+    {"label": "Judges",
+            "start": -1100, "stop": -1020, "bgcolor": "#A9BCF5"},
+    {"label": "United Kingdom",
+            "start": -1020, "stop": -931, "bgcolor": "#F5BCA9"},
+    {"label": "Northern Kingdom (Israel)",
+            "start": -931, "stop": -722, "bgcolor": "#F5A9E1", "topY": 0, "height": 0.7},
+    {"label": "Southern Kingdom (Judah)",
+            "start": -931, "stop": -586, "bgcolor": "#F5A9BC", "topY": 0.7, "height": 0.3},
+    {"label": "Exile",
+            "start": -586, "stop": -538, "bgcolor": "#F78181"}
+                   ]
+  };
+  testtl.loadTimeline(tlObj);
+  assert.ok( testtl.erasArr !== null );
+  assert.equal( testtl.erasArr.length, 5, "erasArr should have five eras" );
+  assert.equal( Object.keys(tlObj.erasArr[0]).length, 9, "Judges should have 9 props, 5 more than it started with" );
+  assert.equal( Object.keys(testtl.erasArr[0]).length, 9, "Judges should have 9 props, 5 more than it started with" );
+
+
+});    
+  </script>
+</body>
+</html>
