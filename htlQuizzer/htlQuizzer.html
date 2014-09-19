@@ -43,11 +43,18 @@ main {
 // =================
 d3.tl.quiz = new d3.tl.Timeline();
 d3.tl.quiz.loadTimeline(d3.tl.overviewTL);
-d3.tl.quizStyle = {
+d3.tl.quizProperties = {
   "borderColor": "#A41034",
-  "footerHTML": "<span class=\"drawnBy\">This is the easy quiz.</span>"
+  "footerHTML": "<span>This is the easy quiz.</span>",
+  // runtime values;
+  "quizCorrect": null,
+  "quizIncorrect": null,
+  "quizFudges": null,
+  "remainingLabels": null,
+  "targetLabel": null,
+  "quizTargetEra": null
 };
-d3.tl.quiz.loadTimeline(d3.tl.quizStyle);
+d3.tl.quiz.loadTimeline(d3.tl.quizProperties);
 d3.tl.quiz.setup("quizContainer");
 d3.tl.quiz.draw();
 d3.tl.quiz.initQuiz("easy");
