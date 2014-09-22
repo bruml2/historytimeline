@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<!-- historytimeline/test/loadTimeline.html  9-18-14 -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>testTimeline Test</title>
+  <link rel="stylesheet" href="../css/qunit-1.15.0.css">
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <div id="tlContainer"></div>
+  <script src="../js/jquery-2.1.1.min.js"></script>
+  <script src="../js/qunit-1.15.0.js"></script>
+  <script src="../js/d3.v3.4.11.min.js"></script>
+  <script src="../js/historytimelineBase.js"></script>
+  <script>
+//==================
+module("Loading and Scaling", {
+  setup: function () {
+    d3.select("#tlContainer").selectAll("div").remove();
+    window.testtl = new d3.tl.Timeline();
+    window.tlObj = {
+          "erasArr": [
+      {"label": "Judges",
+              "start": -1100, "stop": -1020, "bgcolor": "#A9BCF5"},
+      {"label": "United Kingdom",
+              "start": -1020, "stop": -931, "bgcolor": "#F5BCA9"},
+      {"label": "Northern Kingdom (Israel)",
+              "start": -931, "stop": -722, "bgcolor": "#F5A9E1", "topY": 0, "height": 0.7},
+      {"label": "Southern Kingdom (Judah)",
+              "start": -931, "stop": -586, "bgcolor": "#F5A9BC", "topY": 0.7, "height": 0.3,
+              "pePanelXOffset": 20, "pePanelYOffset": 10},
+      {"label": "Exile",
+              "start": -586, "stop": -538, "bgcolor": "#F78181"}
+                     ]
+    };
+  },
+  teardown: function () {
+  }
+});
+QUnit.test( "loadTimeline", function( assert ) {
+  assert.deepEqual( testtl.erasArr, null, "new timeline has null erasArr" );
+  testtl.loadTimeline(tlObj);
+  assert.deepEqual( testtl.erasArr.length, 5, "erasArr should have five eras" );
+  assert.deepEqual( Object.keys(tlObj.erasArr[0]).length, 11, "Judges should have 11 props, 7 more than it started with" );
+  assert.deepEqual( Object.keys(testtl.erasArr[0]).length, 11, "Judges should have 11 props, 7 more than it started with" );
+});
+QUnit.test( "scaleTimeline", function( assert ) {
+  testtl.loadTimeline(tlObj);
+  testtl.scaleTimeline(0.5);
+  assert.deepEqual( testtl.svgWidth, 600, "svgWidth should be 600 (1200 * 0.5)");
+  assert.deepEqual( testtl.erasArr[3].pePanelXOffset, 10, "Southern Kingdom panel x offset should be 10 (20 * 0.5)");
+});
+//==================
+module("DOM Setup", {
+  setup: function () {
+    d3.select("#tlContainer").selectAll("div").remove();
+    window.testtl = new d3.tl.Timeline();
+  },
+  teardown: function () {
+  }
+});
+QUnit.test( "setContainer", function( assert ) {
+  testtl.setContainer("tlContainer");
+  assert.deepEqual( $("#tlContainer").css("position"), "relative", "container has position: relative");
+  assert.deepEqual( $("#tlContainer").css("width"), "1204px", "container has width: 1204px");
+  assert.deepEqual( $("#tlContainer").css("background-color"), "rgb(255, 255, 255)", "container has background-color: rgb(255, 255, 255)");
+});
+QUnit.asyncTest( "set up DOM", function( assert ) {
+  jQuery.getJSON("../tl/HBoverview1TL.json", function(json) {
+    console.log("DOM setup", json);
+    assert.ok(json !== null);
+    testtl.loadTimeline(json);
+    console.log("testtl after loading", testtl);
+    assert.deepEqual( testtl.erasArr.length, 9, "erasArr should have 9 eras" );
+    assert.deepEqual( testtl.erasArr[0].start, -1100, "Judges start is -1100" );
+    testtl.setContainer("tlContainer");
+    // add headerText property to TL;
+    var headerTextObj = {"headerText": "<b>Header text</b> looks like this!"};
+    testtl.loadTimeline(headerTextObj);
+    testtl.addHeaderDiv();
+    assert.deepEqual( $("#tlContainer-header").children().length, 3, "header has 3 children: 2 spans and div");
+    assert.deepEqual( $("#tlContainer-header").children().first().attr("id"), "tlContainer-title", "header contains 2 spans");
+    testtl.addTimelineDiv();
+    assert.deepEqual( $("#tlContainer-timeline").children().length, 1, "timeline contains svg");
+    testtl.addFooterDiv();
+    assert.deepEqual( $("#tlContainer").children().length, 3, "container has 3 children: header, timeline, footer");
+    assert.deepEqual( $("#tlContainer").children().last().css("padding"), "10px 15px", "footer has padding of 10px 15 px");
+    
+    QUnit.start();
+  });
+});
+//==================
+module("Time Axis", {
+  setup: function () {
+    d3.select("#tlContainer").selectAll("div").remove();
+    window.testtl = new d3.tl.Timeline();
+  },
+  teardown: function () {
+    console.log("End of TimeAxis Test", window.testtl);
+  }
+});
+QUnit.asyncTest( "computed time axis", function( assert ) {
+  jQuery.getJSON("../tl/HBoverview1TL.json", function(json) {
+    testtl.loadTimeline(json);
+    testtl.setContainer("tlContainer");
+    testtl.addHeaderDiv();
+    testtl.addTimelineDiv();
+    testtl.addFooterDiv();
+    testtl.drawTimeAxis();
+    assert.deepEqual( parseInt($("svg", "#tlContainer").css("width")), 1200, "svg element has width of 1200");
+    assert.deepEqual( $("#tlContainer .tick").length, 13, "timeAxixGrp contains 13 ticks");
+    assert.deepEqual( $(".domain").length, 1, "timeAxixGrp contains one element with class domain");
+    
+    QUnit.start();
+  });
+});
+QUnit.asyncTest( "declared time axis", function( assert ) {
+  jQuery.getJSON("../tl/HBoverview1TL.json", function(json) {
+    testtl.loadTimeline(json);
+    var axisSpecObj = {"title": "Time Axis Test with -1080 and 190", "axisStartYr": -1080, "axisStopYr": 190};
+    testtl.loadTimeline(axisSpecObj);
+    testtl.setContainer("tlContainer");
+    testtl.addHeaderDiv();
+    testtl.addTimelineDiv();
+    testtl.addFooterDiv();
+    testtl.drawTimeAxis();
+    assert.deepEqual( parseInt($("svg", "#tlContainer").css("width")), 1200, "svg element has width of 1200");
+    assert.deepEqual( $("#tlContainer .tick").length, 14, "timeAxixGrp contains 14 ticks");
+    assert.deepEqual( $(".domain").length, 1, "timeAxixGrp contains one element with class domain");
+    
+    QUnit.start();
+  });
+});
+//==================
+module("Eras", {
+  setup: function () {
+    d3.select("#tlContainer").selectAll("div").remove();
+    window.testtl = new d3.tl.Timeline();
+  },
+  teardown: function () {
+    console.log("End of TimeAxis Test", window.testtl);
+  }
+});
+QUnit.asyncTest( "computed time axis", function( assert ) {
+  jQuery.getJSON("../tl/HBoverview1TL.json", function(json) {
+    testtl.loadTimeline(json);
+    testtl.setup("tlContainer");
+    testtl.drawTimeAxis();
+    assert.deepEqual( parseInt($("svg", "#tlContainer").css("width")), 1200, "svg element has width of 1200");
+    assert.deepEqual( $("#tlContainer .tick").length, 13, "timeAxixGrp contains 13 ticks");
+    assert.deepEqual( $(".domain").length, 1, "timeAxixGrp contains one element with class domain");
+    
+    QUnit.start();
+  });
+});
+  </script>
+</body>
+</html>
+
+
+
+
+
