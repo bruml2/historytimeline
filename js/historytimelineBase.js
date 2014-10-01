@@ -77,7 +77,6 @@ d3.tl.Timeline = function Timeline() {
   // can be turned off or on;
   this.hasEraDatesOnHover = true;
   this.hasPrecipEventsOnHover = false;
-  this.hasFooterTextOnHover = false;
   // runtime values:
   this.containerID = null;
   this.timeScale   = null;    // needed for later scaling (eras);
@@ -96,6 +95,12 @@ d3.tl.Timeline = function Timeline() {
 };
 
 /* =============  Era constructor ====================== */
+/*
+   A "normal" era has era dates on hover, optional precipEvents,
+   and does not have footerText.
+   An era which looks like a range (horizontal bar) usually has
+   footerText; its label is centered vertically with labelTopMargin;
+*/
 d3.tl.Era = function Era(label, start, stop, bgcolor) {
   this.label = label || "Example Label";
   this.start = start || -380;
@@ -103,12 +108,13 @@ d3.tl.Era = function Era(label, start, stop, bgcolor) {
   this.bgcolor = bgcolor || "#F5BCA9";
   this.topY    = 0;
   this.height  = 1.0;
+  this.footerText = null;
   // overides timeline-wide values;  (TO DO)
   this.pePanelXOffset = null;  // offset from default;
   this.pePanelYOffset = null;
   this.labelFontSize   = null;
   this.labelFontFamily = null;
-  this.labelTopMargin  = null;
+  this.labelTopMargin  = null;  // overrides eraLabelsTopMargin of 10;
 };
 
 /* =============  loadTimeline method ====================== */
@@ -119,17 +125,18 @@ d3.tl.Timeline.prototype.loadTimeline = function(tlObj) {
   // wanted (none will be preserved from the standard timeline);
 
   // first, if the tl being loaded has an erasArr, each era is written over an
-  // instantiated era containing all possible era properties;
-  if (tlObj.erasArr) {
-    var newErasArr = tlObj.erasArr.map(function(thisEra, idx, oldEraArr) {
-      var newEra = new d3.tl.Era();
-      Object.keys(thisEra).forEach(function(key) {
-        if (thisEra.hasOwnProperty(key)) { newEra[key] = thisEra[key]; }     
-      });
-      return newEra;
-    });
-    tlObj.erasArr = newErasArr;
+  // instantiated era containing all possible era properties; also ranges;
+  if (tlObj.erasArr !== undefined) {
+    tlObj.erasArr = getNewErasObjArr(tlObj.erasArr);
   }
+  /* DELETE
+  if (tlObj.rangesArr !== undefined) {
+    tlObj.rangesArr = getNewErasObjArr(tlObj.rangesArr);
+    tlObj.rangesArr.forEach(function(thisRange) {
+      thisRange.isRange = true;
+    });
+  }
+  */
   // each property in tlObj is assigned to that property in "this" overriding
   // the defaults assigned in the constructor; Note need for 2nd arg to set
   // value of "this" in function.
@@ -139,8 +146,17 @@ d3.tl.Timeline.prototype.loadTimeline = function(tlObj) {
 
   // check for features;
   if (this.precipEventsObj) { this.hasPrecipEventsOnHover = true; }
-  if (this.footerTextObj)   { this.hasFooterTextOnHover = true; }
   if (this.eventsArr)       { this.hasEvents = true; }
+  
+  function getNewErasObjArr(oldArr) {
+    return oldArr.map(function(thisEra) {
+      var newEra = new d3.tl.Era();
+      Object.keys(thisEra).forEach(function(key) {
+        if (thisEra.hasOwnProperty(key)) { newEra[key] = thisEra[key]; }     
+      });
+      return newEra;
+    });
+  }
   
   console.log("Loaded . . .", tlObj);
 };
@@ -246,10 +262,8 @@ d3.tl.Timeline.prototype.addTimelineDiv = function() {
               "height": t.svgHeight,
               "border": "2px solid " + t.borderColor,
               "background-color": t.backgroundColor});
-  this.D3svg = d3.select("#" + t.containerID + "-timeline svg");
-  /*
   this.D3timeline = d3.select("#" + t.containerID + "-timeline");
-  */
+  this.D3svg      = d3.select("#" + t.containerID + "-timeline svg");
   // add the styles once for all timelines on the page;
   if (document.getElementById("globalTimelineStyles") === null) {
     d3.select("body").append("style")
@@ -326,7 +340,9 @@ d3.tl.Timeline.prototype.drawTimeAxis = function() {
                            .nice();
   // timeAxis is a function which returns the SVG elements for the axis;
   var timeAxis = d3.svg.axis()
-                       .scale(this.timeScale);
+                       .scale(this.timeScale)
+                       .tickFormat(d3.format("d"))
+                       .orient("bottom");
   this.D3svg.append("g")
       .attr("class", "timeAxisGrp")
       // default position is at top of SVG; move to bottom;
@@ -337,6 +353,122 @@ d3.tl.Timeline.prototype.drawTimeAxis = function() {
       .call(timeAxis);
 };
 
+/* =============  drawEras method ====================== */
+d3.tl.Timeline.prototype.drawEras = function(targetEraLabel) {
+  // if targetEraLabel is specified, others are 50% opacity;
+  var t = this;
+  // D3eras is a selection of all the rects;
+  this.D3eras = this.D3svg.append("g")
+      .attr("class", "erasGrp")
+      .selectAll("rect")
+      .data(this.erasArr)
+      .enter()
+      // one rect for each object in the array; "this" is the rect;
+    .append("rect")
+      // the id is the label, e.g., "UnitedKingdom" (alphanum only);
+      .attr("id", function(d) { return t.containerID + "-" +
+                                       d.label.replace(/\W/g, "") + "Era" })
+      .attr("class", "era")
+      .attr("x",  function(d) { return t.timeScale(d.start) })
+      .attr("y",  function(d) { return t.eraTopMargin + (d.topY * t.eraHeight) })
+      // slightly rounded corners;
+      .attr("rx", 4)
+      .attr("ry", 4)
+      .attr("width",  function(d) { return t.timeScale(d.stop) -
+                                           t.timeScale(d.start) })
+      .attr("height", function(d) { return d.height * t.eraHeight })
+      .style("fill",  function(d) { return d.bgcolor })
+      .style("stroke-width", 1)
+      .style("stroke", "black")
+      // mouseover shows the two dates and the precipEventsPanel;
+      .on("mouseover", eraMouseover)
+      .on("mouseout", eraMouseout);
+      
+  // if there is a targetEraLabel, mark it and reduce the opacity of all the other eras;
+  if (targetEraLabel) {
+    this.D3eras.each(function(d, i) {
+      if (this.__data__.label === targetEraLabel) {
+        d3.select(this).style("stroke-width", 2);
+      } else {
+        d3.select(this).style("opacity", 0.5);
+      }
+    });
+  }
+  // htlPanel class defined in the global CSS;
+  this.D3timeline.append("div")
+    .attr("class", "htlPanel");
+  this.D3panel =
+            d3.select("#" + this.containerID + "-timeline .htlPanel");
+            
+  function eraMouseover() {
+    // console.log("mouseover: ", this.__data__.label);
+    if (t.hasEraDatesOnHover && !t.showingAll) {
+      // on mouseover of era, select the two start/stop dates whose class
+      // is the era's id (the dates are text els) and make them visible;
+      var selectorStr = "#" + t.containerID + "-timeline .eraDateGrp ." +
+        this.__data__.label.replace(/\W/g, "");
+      // console.log(selectorStr);
+      d3.selectAll(selectorStr).classed("hidden", false);
+    }
+    var topPara    = t.precipEventsObj[this.__data__.start];
+    var bottomPara = t.precipEventsObj[this.__data__.stop];
+    if (t.hasPrecipEventsOnHover && 
+        topPara     !== undefined &&
+        bottomPara  !== undefined &&
+        !t.showingAll) {
+      // get position and text for the precipEventsPanel; make opaque;
+      var eraObj = this.__data__;
+      var leftX = t.timeScale(eraObj.start) - 10;
+      var topY  = t.eraTopMargin + (eraObj.topY * t.eraHeight) + 46;
+      t.D3panel
+          .style("position", "absolute")
+          .style("left", leftX + "px")
+          .style("top", topY + "px")
+          .style("opacity", 1e-6)
+          .html(topPara + bottomPara)
+        .transition()
+          .duration(400)
+          .style("opacity", 0.95);
+    }
+    if (t.hasFooterTextOnHover) {
+      var D3footer = d3.select("#" + t.containerID + "-footer");
+      t.oldFooterHTML = D3footer.html();
+      var newHTML = t.footerTextObj[this.__data__.label];
+      // if text is long, break into three columns;
+      if (newHTML.length > 200) {
+        D3footer.style("-webkit-column-count","3");
+      }
+      D3footer
+          .html(newHTML)
+          // usually not hidden;
+          .classed("hidden", false);
+    }
+  }
+            
+  function eraMouseout() {
+    // hide the two dates and the precipEventsPanel;
+    // console.log("mouseout:  " + this.__data__.label);
+    if (!t.showingDates && !t.showingAll && t.hasEraDatesOnHover) {
+      var selectorStr = "#" + t.containerID + "-timeline .eraDateGrp ." +
+        this.__data__.label.replace(/\W/g, "");
+      d3.selectAll(selectorStr).classed("hidden", true);
+    }
+    if (t.hasPrecipEventsOnHover) {
+      t.D3panel
+          .transition()
+          .duration(400)
+          .style("opacity", 1e-6);
+    }
+    if (t.hasFooterTextOnHover) {
+      // restore normal footer contents;
+      d3.select("#" + t.containerID + "-footer")
+          .style("-webkit-column-count","1")
+          .html(t.oldFooterHTML);
+          // .classed("hidden", true);
+    }
+  }
+};
+
 
 
 
@@ -345,31 +477,28 @@ d3.tl.Timeline.prototype.drawTimeAxis = function() {
 
 /* =============  setup method ====================== */
 d3.tl.Timeline.prototype.setup = function(container) {
+  // scale by overriding default value of scale; do not call scaleTimeline();
   if (this.scale !== 1) { this.scaleTimeline(this.scale); }
   this.setContainer(container);
-  if (addHeader(this)) { this.addHeaderDiv(); }
+  if (hasHeader(this)) { this.addHeaderDiv(); }
   this.addTimelineDiv();
   if (hasFooter(this)) { this.addFooterDiv(); }
-  
-  function addHeader(tl) {
+  //====== helpers ============
+  function hasHeader(tl) {
     // if hasHeader = false has been added as a TL property, then non-null
     // title and/or subtitle will be overridden (should always have a title);
-    if (tl.hasHeader == true) { return true; }
+    if (tl.hasHeader !== undefined) { return tl.hasHeader; }
     if (tl.title !== "" ||
         tl.subtitle !== "" ||
-        tl.headerText !== "") {
-      return true;
-    }
+        tl.headerText !== "") { return true; }
     return false;
   }
   function hasFooter(tl) {
-    if (tl.footerHTML.length > 0) {
-      return true;
-    }
+    if (tl.footerHTML.length > 0) { return true; }
     return false;
   }
 };
 
-
-
-
+/* ========================================================================= */
+/* ==================  END OF TIMELINE METHODS  ============================ */
+/* ========================================================================= */
