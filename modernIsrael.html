@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!-- this is modernIsrael.html begun September 18, 2014 -->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Modern Israel Timeline</title>
+  <style>
+body {
+  background-color: #D4CBC2;
+  font-family: Palatino, serif;
+}
+.tlContainer {
+  padding: 20px 10px;
+  margin-bottom: 20px;
+}
+  </style>
+</head>
+<body>
+  <h1>Modern Israel Timeline</h1>
+  <div id="timelineContainer" class="tlContainer"></div>
+  
+  <script src="js/d3.v3.4.11.min.js"></script>
+  <script src="js/historytimeline.js"></script>
+  <script>
+    // demonstrates overriding a default value: create an object then add
+    // it as the (optional) third argument to drawTimelineInContainer.
+    // Of course, the object may have more than one property such as
+    // "footerHTML" and the third argumend may be an array of objects.
+    var overrideObj = {
+      "footerHTML": "<span>This is a work-in-progress in connection with the study group <i>The Complexity of Israel</i>.  To see the exact dates of an era and descriptions of its precipitating and ending events, hover your cursor over that era.</span>"
+    };
+    // see the documentation for the alternatives for the first argument;
+    d3.tl.drawTimelineInContainer("tl/ModernIsrael1TL.json",
+                                  "timelineContainer",
+                                  overrideObj);
+  </script>
+</body>
+</html>
