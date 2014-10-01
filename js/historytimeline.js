@@ -327,7 +327,8 @@ d3.tl.Timeline.prototype.drawTimeAxis = function() {
                           .nice();
   // timeAxis is a function which returns the SVG elements for the axis;
   var timeAxis = d3.svg.axis()
-                       .scale(this.timeScale);
+                       .scale(this.timeScale)
+                       .tickFormat(d3.format("d"));
   this.D3svg.append("g")
       .attr("class", "timeAxisGrp")
       // default position is at top of SVG; move to bottom;
