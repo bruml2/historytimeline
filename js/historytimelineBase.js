@@ -416,7 +416,6 @@ d3.tl.Timeline.prototype.drawEras = function(targetEraLabel) {
         !t.showingAll) {
       // get position and text for the precipEventsPanel; make opaque;
       var eraObj = this.__data__;
-      console.log("For: " + eraObj.label + " " + eraObj.pePanelXOffset + " " + eraObj.pePanelYOffset);
       var leftX = t.timeScale(eraObj.start) - 10 + eraObj.pePanelXOffset;
       var topY  = t.eraTopMargin + (eraObj.topY * t.eraHeight) + 46 + eraObj.pePanelYOffset;
       t.D3panel
@@ -594,7 +593,6 @@ d3.tl.Timeline.prototype.drawEraDates = function() {
         .attr("fill", "black")
         .attr("text-rendering", "optimizeLegibility")
         .text(function(d) { return start ? d.start : d.stop });
-    console.log("Dates done");
   }
   addEraDates("start");
   addEraDates("stop");
@@ -650,6 +648,73 @@ d3.tl.Timeline.prototype.draw = function(targetEra) {
     console.log("D3eras: ", this.D3eras);
     console.log("D3eraLabelsGrp: ", this.D3eraLabelsGrp);
     console.log("D3eraDatesGrps: ", this.D3eraDatesGrps);
+  }
+};
+
+/* =============  drawTimelineInContainer method ====================== */
+d3.tl.drawTimelineInContainer = function(timelineRef, containerID, overrideObj) {
+  // NB: this one-call interface only works for a single timeline on the page;
+  // timelineRef may be:
+  //  1) a (string) relative path to the .json file for the timeline;
+  //  2) a string which matches the tlid of a timeline in the database
+  //     which is then mapped to the DB key (e.g., "HBoverview1");
+  //  3) a value which matches the tlid key of a timeline in the database (TODO);
+  // containerID (string) is the id of the container <div> in which to draw;
+  // overrideObj is a js object whose properties override the timeline data;
+  var tlMap = {
+    "HBoverview1": "9dcb7169221a03d8234ed9ee7000021b",
+    "HBideasBasic1": "76c15ecd14a7b61d60e5b1d835000639",
+    "HBprophets1": "cef3c17177f31e9f2c4734f1e2000690"
+  };
+  if (typeof timelineRef === "string") {
+    // could be json filename; could be TL title;
+    if (timelineRef.substr(-5) === ".json") {
+      d3.json(timelineRef, function(error, tlObj) {
+        if (error) { console.log("Error in json: " + error); }
+        var UUID = getUUID();
+        d3.tl[UUID] = new d3.tl.Timeline();
+        d3.tl[UUID].loadTimeline(tlObj);
+        if (overrideObj) { loadOverrides(UUID, overrideObj); }
+        console.dir("Loaded timeline: ", d3.tl[UUID]);
+        d3.tl[UUID].setup(containerID);
+        d3.tl[UUID].draw();
+      });
+    } else if (tlMap[timelineRef]){
+      // fetch from DB and continue;
+      console.log("DB URL: " + "http://historytimelines.iriscouch.com/tl/" + tlMap[timelineRef]);
+      d3.json("http://historytimelines.iriscouch.com/tl/" + tlMap[timelineRef], function(error, dbObj) {
+        if (error) return console.warn(error);
+        console.log("DB Obj: ", dbObj);
+        console.log("DB tl Obj: ", dbObj.tl);
+        var UUID = getUUID();
+        d3.tl[UUID] = new d3.tl.Timeline();
+        d3.tl[UUID].loadTimeline(dbObj.tl);
+        if (overrideObj) { loadOverrides(UUID, overrideObj); }
+        console.dir(d3.tl[UUID]);
+        d3.tl[UUID].setup(containerID);
+        d3.tl[UUID].draw();
+      });
+    } else {
+      throw error("bad argument: should be *.json or a DB tlid");
+    }
+  } else if (typeof d3.tl[timelineRef] === "object") {
+    // this is not yet tested and is probably a bad idea;
+    d3.tl[UUID].loadTimeline(timelineObj);
+  }
+
+  function getUUID() {
+    return performance.now().toString().substr(-9);
+  }
+  
+  function loadOverrides(UUID, overrideObj) { 
+    if (typeof(overrideObj) === "object") {
+      d3.tl[UUID].loadTimeline(overrideObj);
+    } else {
+      // should be an array of such objects;
+      overrideObj.forEach(function(arrItem) {
+        d3.tl[UUID].loadTimeline(arrItem);
+      });
+    }
   }
 };
 
