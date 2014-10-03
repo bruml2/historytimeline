@@ -240,6 +240,27 @@ QUnit.asyncTest( "drawEraLabels()", function( assert ) {
     QUnit.start();
   });
 });
+//==================
+module("drawTimelineInContainer", {
+  setup: function () {
+    d3.select("#tlContainer").selectAll("div").remove();
+  },
+  teardown: function () {
+    // console.log("End of Eras Test", window.testtl);
+  }
+});
+QUnit.asyncTest( "load from .json file", function( assert ) {
+  var overrideObj = {
+      "footerHTML": "<span>This is the canonical version of the Overview Timeline.  To see the exact dates of an era and descriptions of its precipitating and ending events, hover your cursor over it.</span>"
+  };
+  d3.tl.drawTimelineInContainer("../tl/HBoverview1TL.json",
+                                "tlContainer",
+                                overrideObj);
+  assert.deepEqual( $("#tlContainer .era").length, 9, "should be 9 eras");
+  assert.deepEqual( $("#tlContainer-timeline .htlPanel").length, 1, "should be 1 panel");
+
+  QUnit.start();
+});
 
   </script>
 </body>
