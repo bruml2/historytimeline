@@ -205,8 +205,7 @@ QUnit.asyncTest( "drawEras(targetEraLabel)", function( assert ) {
   jQuery.getJSON("../tl/testTimeline.json", function(json) {
     testtl.loadTimeline(json);
     testtl.setup("tlContainer");
-    testtl.drawTimeAxis();
-    testtl.drawEras("Exile");
+    testtl.draw("Exile");
     assert.deepEqual( $("#tlContainer .era").length, 9, "should be 9 eras");
     assert.deepEqual( $("#tlContainer-timeline .htlPanel").length, 1, "should be 1 panel");
     assert.deepEqual( $("#tlContainer-ExileEra").css("opacity"), "1", "Exile should be opacity 1");
@@ -216,6 +215,28 @@ QUnit.asyncTest( "drawEras(targetEraLabel)", function( assert ) {
     assert.deepEqual( $("#tlContainer-timeline .htlPanel").css("position"), "absolute", "position should be absolute");
     // assert.deepEqual( $("#tlContainer-timeline .htlPanel").css("left"), 10, "left should be ?");
     // assert.deepEqual( $(".htlPanel").html().length, 411, "length should be 411");
+    QUnit.start();
+  });
+});
+QUnit.asyncTest( "drawEraLabels()", function( assert ) {
+  jQuery.getJSON("../tl/testTimeline.json", function(json) {
+    testtl.loadTimeline(json);
+    testtl.erasArr[4].label = "VeryLongExile"
+    testtl.erasArr[6].labelTopMargin = 60;
+    testtl.setup("tlContainer");
+    testtl.draw();
+    assert.deepEqual( $("#tlContainer .eraLabel").length, 9, "should be 9 eraLabels");
+    assert.deepEqual( $("#tlContainer .eraLabelsGrp .eraLabel:nth-child(3)").html(), "Northern Kingdom (Israel)",
+                            "3rd label should be Northern Kingdom");
+    assert.deepEqual( $("#tlContainer-timeline .htlPanel").length, 1, "should be 1 panel");
+    assert.deepEqual( $("#tlContainer-timeline .era:eq(4)").attr("x"), "518", "x should be 518");
+
+    assert.deepEqual( $("#tlContainer-timeline .eraLabel:eq(4)").html(), "VeryLongExile", "should be VeryLongExile");
+    assert.deepEqual( $("#tlContainer-timeline .eraLabel:eq(4)").css("left"), "486.5px", "x should be 518");
+    assert.deepEqual( $("#tlContainer-timeline .eraLabel:eq(6)").css("top"), "90px", "top should be 90px");
+
+    assert.deepEqual( $("#tlContainer-timeline .eraDate").length, 18, "should be 18 eraDates");
+
     QUnit.start();
   });
 });
