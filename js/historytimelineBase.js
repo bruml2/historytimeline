@@ -85,13 +85,11 @@ d3.tl.Timeline = function Timeline() {
   this.showingDates = false;
   this.showingAll   = false;
   // D3 selections:
-  this.D3timeline = null;  // 2nd div inside the container;
-  this.D3svg      = null;
-  this.D3eras     = null;
+  this.D3timeline     = null;  // 2nd div inside the container;
+  this.D3svg          = null;
+  this.D3eras         = null;
   this.D3eraLabelsGrp = null;
   this.D3eraDatesGrps = null;
-  // debug:
-  this.showD3selectionsInConsole = false;
 };
 
 /* =============  Era constructor ====================== */
@@ -110,8 +108,8 @@ d3.tl.Era = function Era(label, start, stop, bgcolor) {
   this.height  = 1.0;
   this.footerText = null;
   // overides timeline-wide values;  (TO DO)
-  this.pePanelXOffset = null;  // offset from default;
-  this.pePanelYOffset = null;
+  this.pePanelXOffset = 0;  // offset from default;
+  this.pePanelYOffset = 0;
   this.labelFontSize   = null;
   this.labelFontFamily = null;
   this.labelTopMargin  = null;  // overrides eraLabelsTopMargin of 10;
@@ -418,8 +416,9 @@ d3.tl.Timeline.prototype.drawEras = function(targetEraLabel) {
         !t.showingAll) {
       // get position and text for the precipEventsPanel; make opaque;
       var eraObj = this.__data__;
-      var leftX = t.timeScale(eraObj.start) - 10;
-      var topY  = t.eraTopMargin + (eraObj.topY * t.eraHeight) + 46;
+      console.log("For: " + eraObj.label + " " + eraObj.pePanelXOffset + " " + eraObj.pePanelYOffset);
+      var leftX = t.timeScale(eraObj.start) - 10 + eraObj.pePanelXOffset;
+      var topY  = t.eraTopMargin + (eraObj.topY * t.eraHeight) + 46 + eraObj.pePanelYOffset;
       t.D3panel
           .style("position", "absolute")
           .style("left", leftX + "px")
@@ -469,7 +468,142 @@ d3.tl.Timeline.prototype.drawEras = function(targetEraLabel) {
   }
 };
 
+/* =============  drawEraLabels method ====================== */
+/*  NB: eraLabels are drawn as HTML divs (not svg text) so that they
+    wrap automatically; nonetheless, if the longest word is wider than
+    the era itself, an offset to the left is needed.
+*/
+d3.tl.Timeline.prototype.drawEraLabels = function(targetLabel) {
+  var t = this;
+  // create an invisible div to contain spans used to measure length of
+  // longest word;
+  d3.select("body")
+      .append("div")
+      .attr("id", "widthSpanContainer")
+      .style( {"font-family": t.eraLabelsFontFamily,
+               "font-size": t.eraLabelsFontSize + "px",
+               "visibility": "hidden"} );
+  function getLeftAndStoreWidth(d) {
+    /* this function: returns the x-coordinate of the HTML <div> which will
+       contain the label (if label is wider than era then must shift div left);
+       finds the longest word; gets its width; tests whether wider than the era;
+       if not, returns the x-coorinate of the era-start; if so, returns the
+       x-coordinate for the wider <div>; stores the width of the <div> in d
+       (the eraObj):
+    */
+    // does widest word overflow? Sort by length descending;
+    var words = d.label.split(/ /);
+    var longestWord =
+            words.sort(function(a, b) { return b.length - a.length; })[0];
+    // console.log("Longest: " + longestWord);
+    // create a span to measure width of widest word;
+    var widthSpan = document.createElement('span');
+    widthSpan.setAttribute('style', 'font-family: ' + t.eraLabelsFontFamily +
+            '; font-size: ' + t.eraLabelsFontSize + 'px');
+    widthSpan.innerHTML = longestWord;
+    var cont = document.getElementById('widthSpanContainer');
+    cont.appendChild(widthSpan);
+    // console.log("lastChild.offsetWidth: " + cont.lastChild.offsetWidth);
+    // console.log("lastChild.clientWidth: " + cont.lastChild.clientWidth);
+    // NTTB: clientWidth returns 0;
+    var longestWordWidth = cont.lastChild.offsetWidth;
+    // console.log("Width of " + longestWord + ": " + longestWordWidth);
+    var widthOfEra = t.timeScale(d.stop) - t.timeScale(d.start);
+    // console.log("Width of " + d.label + " era: " + widthOfEra);
+    if (widthOfEra > longestWordWidth) {
+      d.width = widthOfEra;
+      // console.log("Fits; returning: " + t.timeScale(d.start) + "px");
+      return t.timeScale(d.start) + "px";
+    } else {
+      // console.log("Does NOT fit:");
+      d.width = longestWordWidth + 2;
+      // console.log("Normal: " + t.timeScale(d.start));
+      // console.log("  minus: " + ((d.width - widthOfEra) / 2));
+      var offsetLeft = t.timeScale(d.start) - ((d.width - widthOfEra) / 2);
+      // console.log("  Offset left: " + offsetLeft);
+      return offsetLeft + "px";
+    }
+  } // end of getLeftAndStoreWidthVoffset();
+  // NB that labels do NOT go into svg element but after it;
+  this.D3timeline.append("g")
+      .attr("class", "eraLabelsGrp")
+      .selectAll("div")
+      .data(this.erasArr)
+      .enter()
+      // one div for each object in the array;
+    .append("div")
+       // used to hide a single label for quizzes;
+      .attr("id", function(d) {
+        return t.containerID + "-" + d.label.replace(/\W/g, "") + "Label" })
+      .attr("class", "eraLabel")
+      .style({
+        "position": "absolute",
+        "z-index": "1",
+        "text-align": "center",
+        "pointer-events": "none",
+      // if label fits, position against top-left corner of era with same
+      // width; if not, position to left;
+        "left": function(d) { return getLeftAndStoreWidth(d); },
+        "top":  function(d) {
+            return (t.eraTopMargin + (d.topY * t.eraHeight)) +
+                    (d.labelTopMargin ? d.labelTopMargin : t.eraLabelsTopMargin) + "px" },
+        "width": function(d) { return d.width + "px" },
+        "font-family": function(d) {
+                return (d.labelFontFamily ? d.labelFontFamily :
+                                            this.eraLabelsFontFamily) },
+        "font-size": function(d) {
+                return (d.labelFontSize ? d.labelFontSize :
+                                          t.eraLabelsFontSize) + "px";},
+        "color": function(d) { return (d.labelColor ? d.labelColor : "black"); },
+        "opacity": function(d) { if (targetLabel == undefined ||
+                                         d.label === targetLabel)
+                                       { return 1; } else { return 0.5; } }
+       })
+      .text(function(d) { return d.label });
+  // grab the group itself for later delete;
+  this.D3eraLabelsGrp = d3.select("#" + this.containerID + "-timeline .eraLabelsGrp");
 
+  // finished with widthSpanContainer!
+  d3.select("#widthSpanContainer").remove();
+};
+
+/* =============  drawEraDates method ====================== */
+d3.tl.Timeline.prototype.drawEraDates = function() {
+  var t = this;
+  // each era gets TWO hidden svg text elements; class == class-of-era;
+  // mouseover an era causes the pair to appear;
+  // this function is executed twice!
+  function addEraDates (startOrStop) {
+    var start = startOrStop == "start" ? true : false;
+    t.D3svg.append("g")
+        .attr("class", start ? "eraStartDateGrp eraDateGrp" :
+                               "eraStopDateGrp eraDateGrp")
+        .selectAll("text")
+        .data(t.erasArr)
+        .enter()
+      .append("text")
+        .attr("class", function(d) {
+                                return d.label.replace(/\W/g, "") + " eraDate"})
+        // ToDo: use d3 transition to show/hide;
+        .classed("hidden", true)
+        .attr("text-anchor", "middle")
+        .attr("x", function(d) { return t.timeScale(start ? d.start : d.stop); })
+        .attr("y", t.eraTopMargin - (0.5 * parseInt(t.eraDateFontSize)))
+        .attr("font-family", "sans-serif")
+        .attr("font-size", t.eraDateFontSize)
+        .attr("fill", "black")
+        .attr("text-rendering", "optimizeLegibility")
+        .text(function(d) { return start ? d.start : d.stop });
+    console.log("Dates done");
+  }
+  addEraDates("start");
+  addEraDates("stop");
+
+  this.D3eraDatesGrps =
+             d3.selectAll("#" + t.containerID + "-timeline .eraDateGrp");
+  // console.log("Num eraDate elements: " +
+  //  d3.selectAll("#" + t.containerID + "-timeline .eraDate")[0].length);
+};
 
 
 
@@ -496,6 +630,26 @@ d3.tl.Timeline.prototype.setup = function(container) {
   function hasFooter(tl) {
     if (tl.footerHTML.length > 0) { return true; }
     return false;
+  }
+};
+
+/* =============  draw method ====================== */
+d3.tl.Timeline.prototype.draw = function(targetEra) {
+  // draws the entire timeline assuming <container>-timeline div;
+  // targetEra causes heavier outline and 50% opacity for others;
+  this.drawTimeAxis();
+  this.drawEras(targetEra);
+  this.drawEraLabels(targetEra);
+  if (this.hasEraDatesOnHover) { this.drawEraDates(); }
+  // if (this.hasEvents) { this.drawEvents(); }
+
+  // debug:
+  if (false) {
+    console.log("D3timeline: ", this.D3timeline);
+    console.log("D3svg: ", this.D3svg);
+    console.log("D3eras: ", this.D3eras);
+    console.log("D3eraLabelsGrp: ", this.D3eraLabelsGrp);
+    console.log("D3eraDatesGrps: ", this.D3eraDatesGrps);
   }
 };
 
