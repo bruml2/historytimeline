@@ -241,6 +241,42 @@ QUnit.asyncTest( "drawEraLabels()", function( assert ) {
   });
 });
 //==================
+module("Events", {
+  setup: function () {
+    d3.select("#tlContainer").selectAll("div").remove();
+    window.testtl = new d3.tl.Timeline();
+  },
+  teardown: function () {
+    // console.log("End of Eras Test", window.testtl);
+  }
+});
+QUnit.asyncTest( "drawEraLabels()", function( assert ) {
+  jQuery.getJSON("../tl/HBideasBasic1TL.json", function(json) {
+    testtl.loadTimeline(json);
+    testtl.setup("tlContainer");
+    testtl.draw();
+    assert.deepEqual( $("#tlContainer .eraLabel").length, 7, "should be 7 eraLabels");
+    /*
+    assert.deepEqual( $("#tlContainer .eraLabelsGrp .eraLabel:nth-child(3)").html(), "Northern Kingdom (Israel)",
+                            "3rd label should be Northern Kingdom");
+    assert.deepEqual( $("#tlContainer-timeline .htlPanel").length, 1, "should be 1 panel");
+    assert.deepEqual( $("#tlContainer-timeline .era:eq(4)").attr("x"), "518", "x should be 518");
+
+    assert.deepEqual( $("#tlContainer-timeline .eraLabel:eq(4)").html(), "VeryLongExile", "should be VeryLongExile");
+    assert.deepEqual( $("#tlContainer-timeline .eraLabel:eq(4)").css("left"), "486.5px", "x should be 518");
+    assert.deepEqual( $("#tlContainer-timeline .eraLabel:eq(6)").css("top"), "90px", "top should be 90px");
+
+    assert.deepEqual( $("#tlContainer-timeline .eraDate").length, 18, "should be 18 eraDates");
+    */
+
+    QUnit.start();
+  });
+});
+
+
+
+/*
+//==================
 module("drawTimelineInContainer", {
   setup: function () {
     d3.select("#tlContainer").selectAll("div").remove();
@@ -261,7 +297,7 @@ QUnit.asyncTest( "load from .json file", function( assert ) {
 
   QUnit.start();
 });
-
+*/
   </script>
 </body>
 </html>

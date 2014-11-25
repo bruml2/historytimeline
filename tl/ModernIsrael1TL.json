@@ -23,30 +23,38 @@
     {"label": "5th Aliyah (Germany)",
             "start": 1933, "stop": 1939, "bgcolor": "#F5A9E1", "topY": 0.8, "height": 0.2, "labelFontSize": 14},
     {"label": "War of Independence",
-            "start": 1947.9, "stop": 1949.5, "bgcolor": "#F78181", "topY": 0.6, "height": 0.4, "labelFontSize": 14},
+            "start": 1947.9, "stop": 1949.5, "bgcolor": "#F78181", "topY": 0.6, "height": 0.4, "labelFontSize": 14, "labelTopMargin": 50},
     {"label": "Civil War",
-            "start": 1947.8, "stop": 1948.5, "bgcolor": "#F5A9BC", "topY": 0.6, "height": 0.4, "labelFontSize": 14, "labelTopMargin": 50}
+            "start": 1947.8, "stop": 1948.5, "bgcolor": "#F5A9BC", "topY": 0.6, "height": 0.4, "labelFontSize": 14},
+    {"label": "Suez Crisis",
+            "start": 1956, "stop": 1957, "bgcolor": "#F5A9BC", "topY": 0.6, "height": 0.4, "labelFontSize": 14},
+    {"label": "Six-Day War",
+            "start": 1967, "stop": 1967.5, "bgcolor": "#F5A9BC", "topY": 0.6, "height": 0.4, "labelFontSize": 14}
   ],
   "precipEventsObj": {
-    "1880": "<p><b>Ottoman Rule</b> of Palestine began in XXXX. 1880 is just a convenient time to begin our modern history.</p>",
-    "1917": "<p>In <b>1917</b> the defeated Ottoman Empire was partitioned into British and French mandates and several new countries (e.g., Saudi Arabia). Palestine became subject to a mandate to Britain to administer \"until such time as [it] could stand alone.\" <img src=\"images/Palestine_frontier_1922.png\">map</img>) The <b>Balfour Declaration (1917)</b> stated that Britain \"view[ed] with favour the establishment in Palestine of a national home for the Jewish people . . . it it being clearly understood that nothing shall be done which may prejudice the civil and religious rights of existing non-Jewish communities.\"</p>",
+    "1880": "<p><b>Ottoman Rule</b> of Palestine began in 1516. 1880 is just a convenient time to begin our modern history.</p>",
+    "1917": "<p>In <b>1917</b> the defeated Ottoman Empire was partitioned into British and French mandates and several new countries (e.g., Saudi Arabia). Palestine became subject to a mandate to Britain to administer \"until such time as [it] could stand alone.\") The <b>Balfour Declaration (1917)</b> stated that Britain \"view[ed] with favour the establishment in Palestine of a national home for the Jewish people . . . it it being clearly understood that nothing shall be done which may prejudice the civil and religious rights of existing non-Jewish communities.\"</p>",
     "1948.5": "<p>In November of <b>1947</b>, United Nations Resolution 181 recommended the adoption of a plan of partition for Palestine. A civil war immeditately followed until the British Mandate ended on May 14, 1948.  The next day, the armies of Egypt, Syria, Transjordan, and Iraq invaded, beginning the \"War of Independence.\"</p>"
   },
   "eventsArr": [
     {"label": "1896: Theodor Herzl, \"A Jewish State\"",
-     "date": 1896, "centerY": 0.4, "width": 2.5},
+     "date": 1896, "centerY": 0.4, "radius": 6},
     {"label": "1897: First Zionist Congress (Basel)",
-     "date": 1897, "centerY": 0.25, "width": 2.5},
+     "date": 1897, "centerY": 0.25, "radius": 6},
     {"label": "1917: Balfour Declaration",
-     "date": 1917, "centerY": 0.25, "width": 2.5},
+     "date": 1917, "centerY": 0.25, "radius": 6},
     {"label": "1924: Technion (Haifa)",
-     "date": 1924, "centerY": 0.4, "width": 2.5},
+     "date": 1924, "centerY": 0.4, "radius": 6},
     {"label": "1925: Hebrew University",
-     "date": 1925, "centerY": 0.4, "width": 2.5},
+     "date": 1925, "centerY": 0.4, "radius": 6},
     {"label": "1939: White Paper (Immigration)",
-     "date": 1939, "centerY": 0.4, "width": 2.5},
+     "date": 1939, "centerY": 0.4, "radius": 6},
     {"label": "1942: Gutman at Massada",
-     "date": 1942, "centerY": 0.4, "width": 2.5}
+     "date": 1942, "centerY": 0.4, "radius": 6}
+  ],
+  "mapsArr": [
+    {"date": 1917, "map": "images/Palestine_frontier_1922.png" },
+    {"date": 1947, "map": "images/UN_Partition_1947.jpg" }
   ]
 }
 
